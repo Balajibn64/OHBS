@@ -1,4 +1,4 @@
-package com.ohbs.models;
+package com.ohbs.common.model;
 
 public enum Role {
 	ADMIN,

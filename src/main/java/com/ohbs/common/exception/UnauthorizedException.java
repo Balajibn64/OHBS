@@ -1,4 +1,4 @@
-package com.ohbs.exception.customExceptions;
+package com.ohbs.common.exception;
 
 public class UnauthorizedException extends RuntimeException {
     public UnauthorizedException(String message) {

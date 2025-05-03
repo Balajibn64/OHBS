@@ -1,4 +1,4 @@
-package com.ohbs.exception;
+package com.ohbs.common.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -7,11 +7,10 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import com.ohbs.exception.customExceptions.InvalidCredentialsException;
-import com.ohbs.exception.customExceptions.ResourceNotFoundException;
-import com.ohbs.exception.customExceptions.UnauthorizedException;
-import com.ohbs.exception.customExceptions.UserAlreadyExistsException;
-import com.ohbs.exception.customExceptions.UserNotFoundException;
+import com.ohbs.auth.exception.InvalidCredentialsException;
+import com.ohbs.auth.exception.UserAlreadyExistsException;
+import com.ohbs.auth.exception.UserNotFoundException;
+import com.ohbs.common.dto.ErrorResponse;
 
 import jakarta.servlet.http.HttpServletRequest;
 

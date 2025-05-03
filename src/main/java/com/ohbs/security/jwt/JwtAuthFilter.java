@@ -1,4 +1,4 @@
-package com.ohbs.security.util.filter;
+package com.ohbs.security.jwt;
 
 import java.io.IOException;
 import java.util.List;
@@ -9,8 +9,6 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
-
-import com.ohbs.security.util.JwtUtil;
 
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;

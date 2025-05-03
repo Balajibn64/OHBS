@@ -1,4 +1,4 @@
-package com.ohbs.security.util;
+package com.ohbs.security.jwt;
 
 import java.security.Key;
 import java.util.Date;
@@ -7,8 +7,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
-import com.ohbs.models.User;
-import com.ohbs.repository.UserRepository;
+import com.ohbs.common.model.User;
+import com.ohbs.common.repository.UserRepository;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
