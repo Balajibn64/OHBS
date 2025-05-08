@@ -1,6 +1,6 @@
 package com.ohbs.security;
 
-import com.ohbs.security.util.filter.JwtAuthFilter;
+import com.ohbs.security.jwt.JwtAuthFilter;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -30,6 +30,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/auth/**").permitAll()  // Login and registration
                 .requestMatchers("/admin/**").hasRole("ADMIN")
+//                .requestMatchers("/manager/all").hasRole("ADMIN")
                 .requestMatchers("/manager/**").hasRole("MANAGER")
                 .requestMatchers("/customer/**").hasRole("CUSTOMER")
                 .anyRequest().authenticated()
