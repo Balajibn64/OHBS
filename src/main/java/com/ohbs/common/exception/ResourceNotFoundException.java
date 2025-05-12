@@ -1,4 +1,4 @@
-package com.ohbs.exception.customExceptions;
+package com.ohbs.common.exception;
 
 public class ResourceNotFoundException extends RuntimeException {
     public ResourceNotFoundException(String message) {

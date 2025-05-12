@@ -1,4 +1,4 @@
-package com.ohbs.exception;
+package com.ohbs.common.dto;
 
 import java.time.LocalDateTime;
 

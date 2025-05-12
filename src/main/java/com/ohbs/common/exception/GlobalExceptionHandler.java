@@ -1,4 +1,4 @@
-package com.ohbs.exception;
+package com.ohbs.common.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -7,11 +7,10 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import com.ohbs.exception.customExceptions.InvalidCredentialsException;
-import com.ohbs.exception.customExceptions.ResourceNotFoundException;
-import com.ohbs.exception.customExceptions.UnauthorizedException;
-import com.ohbs.exception.customExceptions.UserAlreadyExistsException;
-import com.ohbs.exception.customExceptions.UserNotFoundException;
+import com.ohbs.auth.exception.InvalidCredentialsException;
+import com.ohbs.auth.exception.UserAlreadyExistsException;
+import com.ohbs.auth.exception.UserNotFoundException;
+import com.ohbs.common.dto.ErrorResponse;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -79,6 +78,30 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<ErrorResponse> handleUnauthorized(
             UnauthorizedException ex,
+            HttpServletRequest req) {
+        ErrorResponse response = new ErrorResponse(
+                HttpStatus.UNAUTHORIZED.value(),
+                ex.getMessage(),
+                req.getRequestURI()
+        );
+        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+    }
+    
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidToken(
+            InvalidTokenException ex,
+            HttpServletRequest req) {
+        ErrorResponse response = new ErrorResponse(
+                HttpStatus.UNAUTHORIZED.value(),
+                ex.getMessage(),
+                req.getRequestURI()
+        );
+        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+    }
+    
+    @ExceptionHandler(MissingTokenException.class)
+    public ResponseEntity<ErrorResponse> handleMissingToken(
+    		MissingTokenException ex,
             HttpServletRequest req) {
         ErrorResponse response = new ErrorResponse(
                 HttpStatus.UNAUTHORIZED.value(),

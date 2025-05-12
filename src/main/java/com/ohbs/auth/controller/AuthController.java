@@ -27,7 +27,7 @@ public class AuthController {
 
     @Autowired
     private AuthService authService;
-
+    
     @PostMapping("/register/customer")
     public ResponseEntity<String> registerCustomer(@Valid @RequestBody RegisterCustomerDTO registerDTO, BindingResult result) {
         if (result.hasErrors()) {

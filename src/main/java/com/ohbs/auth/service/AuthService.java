@@ -7,13 +7,13 @@ import org.springframework.stereotype.Service;
 import com.ohbs.auth.dto.LoginRequestDTO;
 import com.ohbs.auth.dto.RegisterCustomerDTO;
 import com.ohbs.auth.dto.RegisterManagerDTO;
-import com.ohbs.exception.customExceptions.InvalidCredentialsException;
-import com.ohbs.exception.customExceptions.UserAlreadyExistsException;
-import com.ohbs.exception.customExceptions.UserNotFoundException;
-import com.ohbs.models.Role;
-import com.ohbs.models.User;
-import com.ohbs.repository.UserRepository;
-import com.ohbs.security.util.JwtUtil;
+import com.ohbs.auth.exception.InvalidCredentialsException;
+import com.ohbs.auth.exception.UserAlreadyExistsException;
+import com.ohbs.auth.exception.UserNotFoundException;
+import com.ohbs.common.model.Role;
+import com.ohbs.common.model.User;
+import com.ohbs.common.repository.UserRepository;
+import com.ohbs.security.jwt.JwtUtil;
 
 @Service
 public class AuthService {
@@ -36,7 +36,7 @@ public class AuthService {
             throw new UserAlreadyExistsException("Username is already in use.");
         }
 		User user = new User();
-		user.setUsername(registerDTO.getUsername());;
+		user.setUsername(registerDTO.getUsername());
 		user.setEmail(registerDTO.getEmail());
 		user.setPassword(passwordEncoder.encode(registerDTO.getPassword()));
 		user.setRole(Role.CUSTOMER);

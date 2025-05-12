@@ -1,4 +1,4 @@
-package com.ohbs.exception.customExceptions;
+package com.ohbs.auth.exception;
 
 public class UserAlreadyExistsException extends RuntimeException {
     public UserAlreadyExistsException(String message) {

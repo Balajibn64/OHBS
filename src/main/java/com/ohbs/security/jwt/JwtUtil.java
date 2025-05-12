@@ -1,4 +1,4 @@
-package com.ohbs.security.util;
+package com.ohbs.security.jwt;
 
 import java.security.Key;
 import java.util.Date;
@@ -7,8 +7,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Component;
 
-import com.ohbs.models.User;
-import com.ohbs.repository.UserRepository;
+import com.ohbs.common.exception.InvalidTokenException;
+import com.ohbs.common.model.User;
+import com.ohbs.common.repository.UserRepository;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
@@ -69,20 +70,21 @@ public class JwtUtil {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
             return true;
         } catch (ExpiredJwtException e) {
-            log.warn("Token expired: {}", e.getMessage());
+            throw new InvalidTokenException("Token expired: " + e.getMessage());
         } catch (UnsupportedJwtException e) {
-            log.warn("Unsupported JWT: {}", e.getMessage());
+            throw new InvalidTokenException("Unsupported JWT: " + e.getMessage());
         } catch (MalformedJwtException e) {
-            log.warn("Malformed JWT: {}", e.getMessage());
+            throw new InvalidTokenException("Malformed JWT: " + e.getMessage());
         } catch (SecurityException e) {
-            log.warn("Invalid JWT signature: {}", e.getMessage());
+            throw new InvalidTokenException("Invalid JWT signature: " + e.getMessage());
         } catch (IllegalArgumentException e) {
-            log.warn("Empty JWT claims: {}", e.getMessage());
+            throw new InvalidTokenException("Empty JWT claims: " + e.getMessage());
         } catch (JwtException e) {
-            log.warn("JWT error: {}", e.getMessage());
+            throw new InvalidTokenException("JWT error: " + e.getMessage());
         }
-        return false;
     }
+
+
 
     public Claims getAllClaimsFromToken(String token) {
         return Jwts.parserBuilder()
