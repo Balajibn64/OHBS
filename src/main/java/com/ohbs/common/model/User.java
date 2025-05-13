@@ -1,4 +1,4 @@
-package com.ohbs.models;
+package com.ohbs.common.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -16,5 +16,6 @@ public class User {
 	private String username;
 	private String email;
 	private String password;
+	private String phoneNumber;
 	private Role role;
 }

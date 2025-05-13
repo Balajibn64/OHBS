@@ -1,10 +1,10 @@
-package com.ohbs.repository;
+package com.ohbs.common.repository;
 
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import com.ohbs.models.User;
+import com.ohbs.common.model.User;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
