@@ -1,5 +1,8 @@
 package com.ohbs.common.exception;
 
+import java.security.InvalidKeyException;
+import java.time.LocalDateTime;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -11,6 +14,15 @@ import com.ohbs.auth.exception.InvalidCredentialsException;
 import com.ohbs.auth.exception.UserAlreadyExistsException;
 import com.ohbs.auth.exception.UserNotFoundException;
 import com.ohbs.common.dto.ErrorResponse;
+import com.ohbs.manager.exception.InvalidManagerUpdateException;
+import com.ohbs.manager.exception.ManagerAccessDeniedException;
+import com.ohbs.manager.exception.ManagerAlreadyAssignedException;
+import com.ohbs.manager.exception.ManagerAlreadyExistsException;
+import com.ohbs.manager.exception.ManagerAssignmentException;
+import com.ohbs.manager.exception.ManagerDeletionException;
+import com.ohbs.manager.exception.ManagerHotelMismatchException;
+import com.ohbs.manager.exception.ManagerInactiveException;
+import com.ohbs.manager.exception.ManagerNotFoundException;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -123,8 +135,88 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
     
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidTokenException(
+    		InvalidTokenException ex,
+    		HttpServletRequest req) {
+    	ErrorResponse response = new ErrorResponse(
+    			HttpStatus.UNAUTHORIZED.value(),
+    			ex.getMessage(),
+    			req.getRequestURI()
+    		);
+    	return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);		
+    }
+    
     private ResponseEntity<ErrorResponse> buildResponseEntity(HttpStatus status, String message, String path) {
         ErrorResponse response = new ErrorResponse(status.value(), message, path);
         return new ResponseEntity<>(response, status);
     }
+
+ // ─────────────────────────────────────────────
+    // MANAGER EXCEPTIONS
+    // ─────────────────────────────────────────────
+    @ExceptionHandler(ManagerNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleManagerNotFound(
+            ManagerNotFoundException ex, HttpServletRequest req) {
+        return buildResponseEntity(HttpStatus.NOT_FOUND, ex.getMessage(), req.getRequestURI());
+    }
+
+    @ExceptionHandler(ManagerAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleManagerAlreadyExists(
+            ManagerAlreadyExistsException ex, HttpServletRequest req) {
+        return buildResponseEntity(HttpStatus.CONFLICT, ex.getMessage(), req.getRequestURI());
+    }
+
+    @ExceptionHandler(InvalidManagerUpdateException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidManagerUpdate(
+            InvalidManagerUpdateException ex, HttpServletRequest req) {
+        return buildResponseEntity(HttpStatus.BAD_REQUEST, ex.getMessage(), req.getRequestURI());
+    }
+
+    @ExceptionHandler(ManagerDeletionException.class)
+    public ResponseEntity<ErrorResponse> handleManagerDeletion(
+            ManagerDeletionException ex, HttpServletRequest req) {
+        return buildResponseEntity(HttpStatus.BAD_REQUEST, ex.getMessage(), req.getRequestURI());
+    }
+
+    @ExceptionHandler(ManagerAssignmentException.class)
+    public ResponseEntity<ErrorResponse> handleManagerAssignment(
+            ManagerAssignmentException ex, HttpServletRequest req) {
+        return buildResponseEntity(HttpStatus.BAD_REQUEST, ex.getMessage(), req.getRequestURI());
+    }
+
+    @ExceptionHandler(ManagerAccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleManagerAccessDenied(
+            ManagerAccessDeniedException ex, HttpServletRequest req) {
+        return buildResponseEntity(HttpStatus.FORBIDDEN, ex.getMessage(), req.getRequestURI());
+    }
+
+    @ExceptionHandler(ManagerAlreadyAssignedException.class)
+    public ResponseEntity<ErrorResponse> handleManagerAlreadyAssigned(
+            ManagerAlreadyAssignedException ex, HttpServletRequest req) {
+        return buildResponseEntity(HttpStatus.CONFLICT, ex.getMessage(), req.getRequestURI());
+    }
+
+    @ExceptionHandler(ManagerHotelMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleManagerHotelMismatch(
+            ManagerHotelMismatchException ex, HttpServletRequest req) {
+        return buildResponseEntity(HttpStatus.BAD_REQUEST, ex.getMessage(), req.getRequestURI());
+    }
+
+    @ExceptionHandler(ManagerInactiveException.class)
+    public ResponseEntity<ErrorResponse> handleManagerInactive(
+            ManagerInactiveException ex, HttpServletRequest req) {
+        return buildResponseEntity(HttpStatus.FORBIDDEN, ex.getMessage(), req.getRequestURI());
+    }
+    private ResponseEntity<ErrorResponse> buildResponse(HttpStatus status, String message, String path) {
+        ErrorResponse error = new ErrorResponse(
+                status.value(),
+                message,
+                path
+        );
+        return new ResponseEntity<>(error, status);
+    }
+
+
+    
 }

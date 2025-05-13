@@ -15,15 +15,14 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 
-@Component
+@Component("managerJwtUtil") // Specify a unique bean name to avoid conflict
 @Slf4j
 public class JwtUtil {
 
     private final Key key;
     private final int accessTokenExpirationMs;
-//    private final int refreshTokenExpirationMs;
-
-//    private final UserRepository userRepository;
+    private final int refreshTokenExpirationMs;
+    private final UserRepository userRepository;
 
     public JwtUtil(
             UserRepository userRepository,
@@ -31,12 +30,19 @@ public class JwtUtil {
             @Value("${jwt.expirationMs}") int accessTokenExpirationMs,
             @Value("${jwt.refreshExpirationMs}") int refreshTokenExpirationMs
     ) {
+        this.userRepository = userRepository;
         this.key = Keys.hmacShaKeyFor(secret.getBytes());
         this.accessTokenExpirationMs = accessTokenExpirationMs;
-//        this.refreshTokenExpirationMs = refreshTokenExpirationMs;
-//        this.userRepository = userRepository;
+        this.refreshTokenExpirationMs = refreshTokenExpirationMs;
     }
 
+    public Long getUserIdFromEmail(String email) {
+        return userRepository.findByUsername(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email))
+                .getId();
+    }
+
+    // Generate access token
     public String generateAccessToken(User user) {
         return Jwts.builder()
                 .setSubject(user.getUsername())
@@ -47,24 +53,28 @@ public class JwtUtil {
                 .compact();
     }
 
-//    public String generateRefreshToken(User user) {
-//        return Jwts.builder()
-//                .setSubject(user.getUsername())
-//                .claim("role", user.getRole().name())
-//                .setIssuedAt(new Date())
-//                .setExpiration(new Date(System.currentTimeMillis() + refreshTokenExpirationMs))
-//                .signWith(key, SignatureAlgorithm.HS512)
-//                .compact();
-//    }
+    // Generate refresh token
+    public String generateRefreshToken(User user) {
+        return Jwts.builder()
+                .setSubject(user.getUsername())
+                .claim("role", user.getRole().name())
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + refreshTokenExpirationMs))
+                .signWith(key, SignatureAlgorithm.HS512)
+                .compact();
+    }
 
+    // Extract email from token
     public String getEmailFromToken(String token) {
         return getAllClaimsFromToken(token).getSubject();
     }
 
+    // Extract role from token
     public String getRoleFromToken(String token) {
         return getAllClaimsFromToken(token).get("role", String.class);
     }
 
+    // Validate token
     public boolean validateToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
@@ -84,8 +94,7 @@ public class JwtUtil {
         }
     }
 
-
-
+    // Extract all claims from token
     public Claims getAllClaimsFromToken(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(key)
@@ -94,15 +103,16 @@ public class JwtUtil {
                 .getBody();
     }
 
-//    public String refreshAccessToken(String refreshToken) {
-//        if (!validateToken(refreshToken)) {
-//            throw new JwtException("Invalid or expired refresh token.");
-//        }
-//
-//        String username = getEmailFromToken(refreshToken);
-//        User user = userRepository.findByUsername(username)
-//                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
-//
-//        return generateAccessToken(user);
-//    }
+    // Refresh access token using refresh token (if implemented in your case)
+    public String refreshAccessToken(String refreshToken) {
+        if (!validateToken(refreshToken)) {
+            throw new JwtException("Invalid or expired refresh token.");
+        }
+
+        String username = getEmailFromToken(refreshToken);
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+
+        return generateAccessToken(user);
+    }
 }
