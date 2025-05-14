@@ -1,15 +1,32 @@
 package com.ohbs.common.exception;
 
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import com.ohbs.auth.exception.InvalidCredentialsException;
 import com.ohbs.auth.exception.UserAlreadyExistsException;
 import com.ohbs.auth.exception.UserNotFoundException;
+import com.ohbs.common.dto.ErrorResponse;
+import com.ohbs.hotelmgt.exception.DuplicateHotelNameException;
+import com.ohbs.hotelmgt.exception.HotelImageUploadException;
+import com.ohbs.hotelmgt.exception.HotelNotFoundException;
+import com.ohbs.hotelmgt.exception.InvalidRatingException;
+import com.ohbs.hotelmgt.exception.ValidationErrorException;
+import com.ohbs.hotelmgt.exception.InvalidRequestException;
+import com.ohbs.hotelmgt.exception.RecordNotFoundException;
+
 import com.ohbs.common.dto.ErrorResponse;
 
 import jakarta.servlet.http.HttpServletRequest;
@@ -123,8 +140,88 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
     
-    private ResponseEntity<ErrorResponse> buildResponseEntity(HttpStatus status, String message, String path) {
-        ErrorResponse response = new ErrorResponse(status.value(), message, path);
-        return new ResponseEntity<>(response, status);
+//    Hotel Exception
+    
+    @ExceptionHandler(HotelNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleHotelNotFound(
+            HotelNotFoundException ex, HttpServletRequest req) {
+        ErrorResponse response = new ErrorResponse(
+                HttpStatus.NOT_FOUND.value(),
+                "Hotel not found: " + ex.getMessage(),
+                req.getRequestURI()
+        );
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
+
+    @ExceptionHandler(DuplicateHotelNameException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateHotelName(
+            DuplicateHotelNameException ex, HttpServletRequest req) {
+        ErrorResponse response = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "Duplicate hotel name: " + ex.getMessage(),
+                req.getRequestURI()
+        );
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+    
+    @ExceptionHandler(HotelImageUploadException.class)
+    public ResponseEntity<ErrorResponse> handleHotelImageUploadException(
+    		HotelImageUploadException ex, HttpServletRequest req) {
+        ErrorResponse response = new ErrorResponse(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "Hotel image upload failed: " + ex.getMessage(),
+                req.getRequestURI()
+        );
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    
+    @ExceptionHandler(ValidationErrorException.class)
+    public ResponseEntity<ErrorResponse> handleValidationError(ValidationErrorException ex, HttpServletRequest req) {
+        ErrorResponse response = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "Validation error: " + ex.getMessage(),
+                req.getRequestURI()
+        );
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+    
+    @ExceptionHandler(InvalidRatingException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidRating(InvalidRatingException ex, HttpServletRequest req) {
+        ErrorResponse response = new ErrorResponse(
+            HttpStatus.BAD_REQUEST.value(),
+            "Invalid rating: " + ex.getMessage(),
+            req.getRequestURI()
+        );
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
+        @ExceptionHandler(RecordNotFoundException.class)
+        public ResponseEntity<ErrorResponse> handleRecordNotFoundException(
+                RecordNotFoundException ex, HttpServletRequest req) {
+
+            ErrorResponse response = new ErrorResponse(
+                    HttpStatus.NOT_FOUND.value(),
+                    "Record not found: " + ex.getMessage(),
+                    req.getRequestURI()
+            );
+
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
+        
+        @ExceptionHandler(HttpMessageNotReadableException.class)
+        public ResponseEntity<ErrorResponse> handleJsonParseError(
+                HttpMessageNotReadableException ex, HttpServletRequest req) {
+
+            ErrorResponse response = new ErrorResponse(
+                    HttpStatus.BAD_REQUEST.value(),
+                    "Malformed JSON: Please check the request format and data types.",
+                    req.getRequestURI()
+            );
+
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+        
+        private ResponseEntity<ErrorResponse> buildResponseEntity(HttpStatus status, String message, String path) {
+            ErrorResponse response = new ErrorResponse(status.value(), message, path);
+            return new ResponseEntity<>(response, status);
+        }
 }
