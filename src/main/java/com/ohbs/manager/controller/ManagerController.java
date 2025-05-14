@@ -29,7 +29,7 @@ import lombok.RequiredArgsConstructor;
 public class ManagerController {
 
     private final ManagerService managerService;
-    private final JwtUtil jwtUtil; // ✅ follow Java naming convention
+    private final JwtUtil jwtUtil;
 
     // Create manager profile
     @PostMapping

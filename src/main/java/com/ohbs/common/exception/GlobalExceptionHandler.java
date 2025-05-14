@@ -135,17 +135,17 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
     
-    @ExceptionHandler(InvalidTokenException.class)
-    public ResponseEntity<ErrorResponse> handleInvalidTokenException(
-    		InvalidTokenException ex,
-    		HttpServletRequest req) {
-    	ErrorResponse response = new ErrorResponse(
-    			HttpStatus.UNAUTHORIZED.value(),
-    			ex.getMessage(),
-    			req.getRequestURI()
-    		);
-    	return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);		
-    }
+//    @ExceptionHandler(InvalidTokenException.class)
+//    public ResponseEntity<ErrorResponse> handleInvalidTokenException(
+//    		InvalidTokenException ex,
+//    		HttpServletRequest req) {
+//    	ErrorResponse response = new ErrorResponse(
+//    			HttpStatus.UNAUTHORIZED.value(),
+//    			ex.getMessage(),
+//    			req.getRequestURI()
+//    		);
+//    	return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);		
+//    }
     
     private ResponseEntity<ErrorResponse> buildResponseEntity(HttpStatus status, String message, String path) {
         ErrorResponse response = new ErrorResponse(status.value(), message, path);
