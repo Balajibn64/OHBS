@@ -40,8 +40,6 @@ public class Hotel {
     private double rating;
 
     @Column(name = "image_url")
-    @NotBlank(message = "Image URL cannot be empty")
-    @Pattern(regexp = "^(https?://).+\\.(jpg|jpeg|png|webp)$", message = "Image URL must start with http:// or https:// and end with a valid image extension (jpg, png, webp)")
     @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<HotelImage> images = new ArrayList<>();
 

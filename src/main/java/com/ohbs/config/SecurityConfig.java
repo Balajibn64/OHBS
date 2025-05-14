@@ -40,6 +40,7 @@ public class SecurityConfig {
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .requestMatchers("/manager/**").hasRole("MANAGER")
                 .requestMatchers("/customer/**").hasRole("CUSTOMER")
+                .requestMatchers("/rooms/**").hasRole("MANAGER")
                 .anyRequest().authenticated()
             )
             .exceptionHandling(ex -> ex

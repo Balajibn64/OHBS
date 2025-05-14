@@ -48,8 +48,9 @@ public class RoomController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteRoom(@PathVariable Long id) {
+    public ResponseEntity<String> deleteRoom(@PathVariable("id") Long id) {
         roomService.deleteRoom(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok("Room with ID " + id + " has been deleted.");
     }
+
 }

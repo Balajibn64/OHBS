@@ -2,6 +2,8 @@ package com.ohbs.room.model;
 
 import java.time.LocalDateTime;
 
+import com.ohbs.hotelmgt.model.Hotel;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -32,10 +34,10 @@ public class Room {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-//
-//    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-//    @JoinColumn(name = "hotel_id", nullable = false)
-//    private Hotel hotel;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "hotel_id", nullable = false)
+    private Hotel hotel;
 
     @Column(name = "room_number", nullable = false)
     private String roomNumber;
