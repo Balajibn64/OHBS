@@ -33,9 +33,9 @@ public class ImageController {
 
     @PutMapping("/update/{imageId}")
     public ResponseEntity<?> updateImage(@PathVariable Long imageId,
-                                         @RequestParam("file") MultipartFile file) {
+                                         @RequestParam("files") MultipartFile files) {
         try {
-            String updatedUrl = imageService.updateImage(imageId, file);
+            String updatedUrl = imageService.updateImage(imageId, files);
             return ResponseEntity.ok(Map.of("updatedImageUrl", updatedUrl));
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));

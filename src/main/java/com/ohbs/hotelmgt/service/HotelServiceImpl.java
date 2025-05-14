@@ -1,7 +1,6 @@
 package com.ohbs.hotelmgt.service;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -10,6 +9,7 @@ import com.ohbs.hotelmgt.exception.DuplicateHotelNameException;
 import com.ohbs.hotelmgt.exception.HotelNotFoundException;
 import com.ohbs.hotelmgt.exception.InvalidRatingException;
 import com.ohbs.hotelmgt.model.Hotel;
+import com.ohbs.hotelmgt.model.HotelImage;
 import com.ohbs.hotelmgt.repository.HotelRepository;
 
 @Service
@@ -24,11 +24,14 @@ public class HotelServiceImpl implements HotelService {
             throw new DuplicateHotelNameException("Hotel with name '" + hotel.getName() + "' already exists.");
         }
 
-        if (hotel.getRating() < 0 || hotel.getRating() > 5) {
-            throw new InvalidRatingException("Rating must be between 0 and 5.");
+        validateRating(hotel.getRating());
+
+        if (hotel.getImages() != null) {
+            for (HotelImage image : hotel.getImages()) {
+                image.setHotel(hotel); // 🔗 Link images to hotel
+            }
         }
 
-        // You could add logic for image validation here if needed
         return hotelRepository.save(hotel);
     }
 
@@ -44,24 +47,34 @@ public class HotelServiceImpl implements HotelService {
     }
 
     @Override
-    public Hotel updateHotel(Hotel hotels) {
-        Hotel existingHotel = hotelRepository.findById(hotels.getId())
-                .orElseThrow(() -> new HotelNotFoundException("Hotel with ID " + hotels.getId() + " not found"));
+    public Hotel updateHotel(Hotel updatedHotel) {
+        // ⛔ Prevent update of deleted hotel
+        Hotel existingHotel = hotelRepository.findByIdAndIsDeletedFalse(updatedHotel.getId())
+                .orElseThrow(() -> new HotelNotFoundException("Hotel with ID " + updatedHotel.getId() + " not found or has been deleted."));
 
-        if (!existingHotel.getName().equals(hotels.getName())
-                && hotelRepository.findByName(hotels.getName()) != null) {
-            throw new DuplicateHotelNameException("Another hotel with name '" + hotels.getName() + "' already exists.");
+        // Check for name conflict
+        Hotel duplicate = hotelRepository.findByName(updatedHotel.getName());
+        if (!existingHotel.getName().equals(updatedHotel.getName())
+                && duplicate != null && !duplicate.getId().equals(existingHotel.getId())) {
+            throw new DuplicateHotelNameException("Another hotel with name '" + updatedHotel.getName() + "' already exists.");
         }
 
-        if (hotels.getRating() < 0 || hotels.getRating() > 5) {
-            throw new InvalidRatingException("Rating must be between 0 and 5.");
-        }
+        validateRating(updatedHotel.getRating());
 
-        existingHotel.setName(hotels.getName());
-        existingHotel.setLocation(hotels.getLocation());
-        existingHotel.setDescription(hotels.getDescription());
-        existingHotel.setRating(hotels.getRating());
-//        existingHotel.setImageUrl(hotels.getImageUrl());
+        // Basic field updates
+        existingHotel.setName(updatedHotel.getName());
+        existingHotel.setLocation(updatedHotel.getLocation());
+        existingHotel.setDescription(updatedHotel.getDescription());
+        existingHotel.setRating(updatedHotel.getRating());
+
+        // Replace images
+        existingHotel.getImages().clear();
+        if (updatedHotel.getImages() != null) {
+            for (HotelImage image : updatedHotel.getImages()) {
+                image.setHotel(existingHotel);
+                existingHotel.getImages().add(image);
+            }
+        }
 
         return hotelRepository.save(existingHotel);
     }
@@ -72,5 +85,11 @@ public class HotelServiceImpl implements HotelService {
                 .orElseThrow(() -> new HotelNotFoundException("Hotel with ID " + id + " not found"));
         hotel.setDeleted(true);  // Soft delete
         hotelRepository.save(hotel);
+    }
+
+    private void validateRating(double rating) {
+        if (rating < 1.0 || rating > 5.0) {
+            throw new InvalidRatingException("Rating must be between 1.0 and 5.0.");
+        }
     }
 }

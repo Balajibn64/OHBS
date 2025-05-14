@@ -195,6 +195,15 @@ public class GlobalExceptionHandler {
 
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
+        @ExceptionHandler(IllegalArgumentException.class)
+        public ResponseEntity<ErrorResponse> handleIllegalArgumentException(IllegalArgumentException ex, HttpServletRequest req) {
+            ErrorResponse response = new ErrorResponse(
+                    HttpStatus.NOT_FOUND.value(),
+                    ex.getMessage(),
+                    req.getRequestURI()
+            );
+            return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        }
         
         private ResponseEntity<ErrorResponse> buildResponseEntity(HttpStatus status, String message, String path) {
             ErrorResponse response = new ErrorResponse(status.value(), message, path);

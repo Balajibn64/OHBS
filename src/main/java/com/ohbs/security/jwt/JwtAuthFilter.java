@@ -25,37 +25,50 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-			throws ServletException, IOException {
+	        throws ServletException, IOException {
 
-		try {
-			String authHeader = request.getHeader("Authorization");
-			if (authHeader != null && authHeader.startsWith("Bearer ")) {
-				String token = authHeader.substring(7);
+	    String authHeader = request.getHeader("Authorization");
 
-				if (jwtUtil.validateToken(token)) {
-					String username = jwtUtil.getEmailFromToken(token); // getEmailFromToken returns subject
-					Claims claims = jwtUtil.getAllClaimsFromToken(token);
-					String role = claims.get("role", String.class);
+	    if (authHeader != null && authHeader.startsWith("Bearer ")) {
+	        String token = authHeader.substring(7);
 
-					List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role)); // Spring
-																												// expects
-																												// "ROLE_"
-																												// prefix
+	        try {
+	            // ✅ validateToken may throw ExpiredJwtException or other exceptions
+	            if (!jwtUtil.validateToken(token)) {
+	                throw new RuntimeException("Invalid JWT token");
+	            }
 
-					UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-							username, null, authorities);
+	            String username = jwtUtil.getEmailFromToken(token);
+	            Claims claims = jwtUtil.getAllClaimsFromToken(token);
+	            String role = claims.get("role", String.class);
 
-					SecurityContextHolder.getContext().setAuthentication(authentication);
-				}
-			}
-		} catch (Exception e) {
-			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-			response.setContentType("application/json");
-			response.getWriter().write("{\"error\": \"Invalid or expired JWT token.\"}");
-			return;
-		}
+	            List<GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + role));
 
-		filterChain.doFilter(request, response);
+	            UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
+	                    username, null, authorities);
+
+	            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+	        } catch (io.jsonwebtoken.ExpiredJwtException ex) {
+	            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+	            response.setContentType("application/json");
+	            response.getWriter().write("{\"error\": \"Token has expired. Please log in again.\"}");
+	            return;
+	        } catch (io.jsonwebtoken.SignatureException | io.jsonwebtoken.MalformedJwtException ex) {
+	            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+	            response.setContentType("application/json");
+	            response.getWriter().write("{\"error\": \"Invalid JWT token signature.\"}");
+	            return;
+	        } catch (Exception ex) {
+	            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+	            response.setContentType("application/json");
+	            response.getWriter().write("{\"error\": \"Invalid or expired JWT token.\"}");
+	            return;
+	        }
+	    }
+
+	    filterChain.doFilter(request, response);
 	}
+
 
 }

@@ -40,9 +40,9 @@ public class Hotel {
     private double rating;
 
     @Column(name = "image_url")
-    @NotBlank(message = "Image URL cannot be empty")
-    @Pattern(regexp = "^(https?://).+\\.(jpg|jpeg|png|webp)$", message = "Image URL must start with http:// or https:// and end with a valid image extension (jpg, png, webp)")
-    @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true)
+//    @NotBlank(message = "Image URL cannot be empty")
+//    @Pattern(regexp = "^(https?://).+\\.(jpg|jpeg|png|webp)$", message = "Image URL must start with http:// or https:// and end with a valid image extension (jpg, png, webp)")
+    @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<HotelImage> images = new ArrayList<>();
 
     /**
@@ -59,5 +59,9 @@ public class Hotel {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+	public boolean getIsDeleted() {
+		return this.isDeleted;
+	}
 
 }
