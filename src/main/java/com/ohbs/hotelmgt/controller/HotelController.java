@@ -21,7 +21,6 @@ public class HotelController {
     @Autowired
     private HotelService hotelService;
 
-    // ✅ Corrected: POST /hotels (not /hotels/hotels)
     @PostMapping
     public ResponseEntity<Hotel> createHotel(@Valid @RequestBody Hotel hotels) {
         Hotel createdHotel = hotelService.createHotel(hotels);

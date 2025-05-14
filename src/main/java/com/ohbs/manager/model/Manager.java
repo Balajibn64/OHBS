@@ -3,9 +3,9 @@ package com.ohbs.manager.model;
 import java.time.LocalDateTime;
 
 import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
 
 import com.ohbs.common.model.User;
+import com.ohbs.hotelmgt.model.Hotel;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -50,9 +50,9 @@ public class Manager {
     @Column(name = "phone")
     private String phone;
 
-//    @ManyToOne
-//    @JoinColumn(name = "hotel_id")
-//    private Hotel hotel;
+    @ManyToOne
+    @JoinColumn(name = "hotel_id")
+    private Hotel hotel;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
