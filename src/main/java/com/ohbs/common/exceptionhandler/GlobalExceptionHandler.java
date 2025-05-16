@@ -3,27 +3,45 @@ package com.ohbs.common.exception;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import java.security.InvalidKeyException;
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.ohbs.Customer.exception.CustomerNotFoundException;
+import com.ohbs.Customer.exception.InvalidCustomerDataException;
+import com.ohbs.Customer.exception.OperationNotAllowedException;
+import com.ohbs.Customer.exception.UnauthorizedAccessException;
+import com.ohbs.Customer.exception.UserAlreadyHasCustomerProfileException;
 import com.ohbs.auth.exception.InvalidCredentialsException;
 import com.ohbs.auth.exception.UserAlreadyExistsException;
 import com.ohbs.auth.exception.UserNotFoundException;
 import com.ohbs.common.dto.ErrorResponse;
 import com.ohbs.hotelmgt.exception.DuplicateHotelNameException;
 import com.ohbs.hotelmgt.exception.HotelImageUploadException;
-import com.ohbs.hotelmgt.exception.HotelNotFoundException;
 import com.ohbs.hotelmgt.exception.InvalidRatingException;
 import com.ohbs.hotelmgt.exception.RecordNotFoundException;
 import com.ohbs.hotelmgt.exception.ValidationErrorException;
 import com.ohbs.room.exception.InvalidRoomDataException;
 import com.ohbs.room.exception.RoomAlreadyExistsException;
 import com.ohbs.room.exception.RoomNotAvailableException;
+import com.ohbs.manager.exception.InvalidManagerUpdateException;
+import com.ohbs.manager.exception.ManagerAccessDeniedException;
+import com.ohbs.manager.exception.ManagerAlreadyExistsException;
+import com.ohbs.manager.exception.ManagerAssignmentException;
+import com.ohbs.manager.exception.ManagerDeletionException;
+import com.ohbs.manager.exception.ManagerHotelMismatchException;
+import com.ohbs.manager.exception.ManagerInactiveException;
+import com.ohbs.manager.exception.ManagerNotFoundException;
 
 import jakarta.servlet.http.HttpServletRequest;
-
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
