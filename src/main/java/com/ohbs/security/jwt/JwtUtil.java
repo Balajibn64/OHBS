@@ -118,15 +118,16 @@ public class JwtUtil {
     }
 
     
-    // public Long extractUserId(String token) {
-    //     if (token.startsWith("Bearer ")) {
-    //         token = token.substring(7); // remove "Bearer "
-    //     }
+     public Long extractUserId(String token) {
+         if (token.startsWith("Bearer ")) {
+             token = token.substring(7); // remove "Bearer "
+         }
 
-    //     String email = getEmailFromToken(token); // subject from JWT
-    //     User user = userRepository.findByUsername(email)
-    //             .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
+         String email = getEmailFromToken(token); // subject from JWT
+         User user = userRepository.findByUsername(email)
+                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
 
-    //     return user.getId();
-    // }
+         return user.getId();
+     }
+ }
 

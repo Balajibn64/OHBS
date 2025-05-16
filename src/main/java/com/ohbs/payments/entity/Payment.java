@@ -1,22 +1,18 @@
 package com.ohbs.payments.entity;
 
 import java.time.LocalDateTime;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.PreUpdate;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+import lombok.*;
 
 @Entity
-@Table(name = "payments")
+@Table(
+    name = "payments",
+    indexes = {
+        @Index(name = "idx_transaction_id", columnList = "transactionId"),
+        @Index(name = "idx_booking_id", columnList = "bookingId")
+    }
+)
 @Data
 @Builder
 @AllArgsConstructor
@@ -27,22 +23,30 @@ public class Payment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Foreign key - Booking (Assumed another entity exists)
+    @NotNull
     private Long bookingId;
 
     @Column(nullable = false)
     private LocalDateTime paymentDate;
 
+    @NotNull
+    @PositiveOrZero
     @Column(nullable = false)
     private Double amount;
 
-    @Column(nullable = false)
+    @NotBlank
+    @Size(max = 50)
+    @Column(nullable = false, length = 50)
     private String paymentMethod;
 
-    @Column(nullable = false)
+    @NotBlank
+    @Size(max = 20)
+    @Column(nullable = false, length = 20)
     private String paymentStatus;
 
-    @Column(unique = true)
+    @NotBlank
+    @Size(max = 100)
+    @Column(unique = true, nullable = false, length = 100)
     private String transactionId;
 
     private LocalDateTime createdAt;
@@ -51,7 +55,9 @@ public class Payment {
     @PrePersist
     public void onCreate() {
         createdAt = LocalDateTime.now();
-        paymentDate = LocalDateTime.now();
+        if (paymentDate == null) {
+            paymentDate = LocalDateTime.now();
+        }
     }
 
     @PreUpdate

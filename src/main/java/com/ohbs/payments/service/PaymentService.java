@@ -11,4 +11,5 @@ public interface PaymentService {
     List<PaymentResponseDTO> getPaymentsByBooking(Long bookingId);
     PaymentResponseDTO updatePayment(Long id, PaymentRequestDTO dto);
     void processPayment(Long id);
+    void cancelPayment(Long id);
 }
