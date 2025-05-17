@@ -4,14 +4,16 @@ import jakarta.persistence.Column;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
-public class RegisterCustomerDTO {
-    
-    @NotBlank(message = "Username is required")
+@Builder
+public class RegisterUserDTO {
+	@NotBlank(message = "Username is required")
     @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
-    @Column(unique = true)
+	@Column(unique = true)
+	@NotBlank
     private String username;
     
     @NotBlank(message = "Email is required")

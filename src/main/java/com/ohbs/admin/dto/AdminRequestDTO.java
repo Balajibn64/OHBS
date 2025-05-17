@@ -1,5 +1,9 @@
 package com.ohbs.admin.dto;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 @Data
@@ -7,8 +11,31 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class AdminRequestDTO {
-    private String firstName;
-    private String lastName;
-    private String phone;
-}
 
+    @NotBlank(message = "First name is required.")
+    @Size(max = 50, message = "First name cannot exceed 50 characters.")
+    private String firstName;
+
+    @NotBlank(message = "Last name is required.")
+    @Size(max = 50, message = "Last name cannot exceed 50 characters.")
+    private String lastName;
+
+    @NotBlank(message = "Phone number is required.")
+    @Pattern(
+        regexp = "^\\+?[0-9]{10,15}$",
+        message = "Phone number must be between 10 and 15 digits, optionally starting with +."
+    )
+    private String phone;
+
+//    @NotBlank(message = "Username is required.")
+//    @Size(min = 4, max = 30, message = "Username must be between 4 and 30 characters.")
+//    private String username;
+//
+//    @NotBlank(message = "Email is required.")
+//    @Email(message = "Invalid email format.")
+//    private String email;
+//
+//    @NotBlank(message = "Password is required.")
+//    @Size(min = 6, max = 100, message = "Password must be between 6 and 100 characters.")
+//    private String password;
+}
