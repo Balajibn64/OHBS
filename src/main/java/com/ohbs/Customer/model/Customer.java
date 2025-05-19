@@ -28,10 +28,15 @@ public class Customer {
 
     @Column(name = "last_name", nullable = false)
     private String lastName;
-
+    
+    @Column(name = "phone")
     private String phone;
 
+    @Column(name = "address")
     private String address;
+
+    @Column(name = "profile_image_url")
+    private String profileImageUrl;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;

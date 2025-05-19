@@ -19,6 +19,5 @@ public class User extends Auditable{
 	private String username;
 	private String email;
 	private String password;
-//	private String phoneNumber;
 	private Role role;
 }

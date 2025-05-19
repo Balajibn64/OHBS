@@ -17,11 +17,10 @@ public class HotelRequestDTO {
     @Size(min = 10, message = "Description must be at least 10 characters")
     private String description;
 
-    @NotBlank
+    @NotNull(message = "Rating is required")
     @DecimalMin(value = "1.0", inclusive = true, message = "Rating must be at least 1.0")
     @DecimalMax(value = "5.0", inclusive = true, message = "Rating cannot exceed 5.0")
-    private double rating;
+    private Double rating;
 
-    @NotBlank(message = "Image URL cannot be empty")
     private String imageUrl;
 }

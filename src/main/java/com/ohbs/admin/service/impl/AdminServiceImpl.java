@@ -12,6 +12,7 @@ import com.ohbs.Customer.model.Customer;
 import com.ohbs.Customer.repository.CustomerRepository;
 import com.ohbs.admin.dto.AdminRequestDTO;
 import com.ohbs.admin.dto.AdminResponseDTO;
+import com.ohbs.admin.exception.AdminNotFoundException;
 import com.ohbs.admin.model.Admin;
 import com.ohbs.admin.repository.AdminRepository;
 import com.ohbs.admin.service.AdminService;
@@ -39,8 +40,10 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public AdminResponseDTO createAdmin(AdminRequestDTO dto, RegisterUserDTO regdto) {
+        // Register user with Role.ADMIN
         User user = userService.registerUser(regdto, Role.ADMIN);
 
+        // Build and save Admin entity
         Admin admin = Admin.builder()
                 .firstName(dto.getFirstName())
                 .lastName(dto.getLastName())
@@ -48,43 +51,53 @@ public class AdminServiceImpl implements AdminService {
                 .user(user)
                 .build();
 
-        return mapToAdminResponseDTO(adminRepository.save(admin));
+        adminRepository.save(admin);
+        return mapToAdminResponseDTO(admin);
     }
 
     @Override
     public AdminResponseDTO getAdminById(Long id) {
-        Admin admin = adminRepository.findById(id).orElseThrow(() -> new RuntimeException("Admin not found"));
+        Admin admin = adminRepository.findById(id)
+                .orElseThrow(() -> new AdminNotFoundException("Admin with ID " + id + " not found"));
         return mapToAdminResponseDTO(admin);
     }
 
     @Override
     public AdminResponseDTO getAdminByUserId(Long userId) {
-        Admin admin = adminRepository.findByUserId(userId).orElseThrow(() -> new RuntimeException("Admin not found"));
+        Admin admin = adminRepository.findByUserId(userId)
+                .orElseThrow(() -> new AdminNotFoundException("Admin with User ID " + userId + " not found"));
         return mapToAdminResponseDTO(admin);
     }
 
     @Override
     public List<AdminResponseDTO> getAllAdmins() {
-        return adminRepository.findAll().stream()
+        List<Admin> admins = adminRepository.findAll();
+        return admins.stream()
                 .map(this::mapToAdminResponseDTO)
                 .collect(Collectors.toList());
     }
 
     @Override
     public AdminResponseDTO updateAdmin(Long id, AdminRequestDTO dto) {
-        Admin admin = adminRepository.findById(id).orElseThrow(() -> new RuntimeException("Admin not found"));
+        Admin admin = adminRepository.findById(id)
+                .orElseThrow(() -> new AdminNotFoundException("Admin with ID " + id + " not found"));
 
+        // Update fields
         admin.setFirstName(dto.getFirstName());
         admin.setLastName(dto.getLastName());
         admin.setPhone(dto.getPhone());
 
-        return mapToAdminResponseDTO(adminRepository.save(admin));
+        adminRepository.save(admin);
+        return mapToAdminResponseDTO(admin);
     }
 
     @Override
     public void deleteAdmin(Long id) {
-        adminRepository.deleteById(id);
+        Admin admin = adminRepository.findById(id)
+                .orElseThrow(() -> new AdminNotFoundException("Admin with ID " + id + " not found"));
+        adminRepository.delete(admin);
     }
+
 
     // ---------- CUSTOMER ----------
 

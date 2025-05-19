@@ -1,7 +1,9 @@
 package com.ohbs.Customer.service;
 
-import com.ohbs.Customer.dto.*;
-import com.ohbs.Customer.dto.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.ohbs.Customer.dto.CustomerRequestDTO;
+import com.ohbs.Customer.dto.CustomerResponseDTO;
 
 public interface CustomerService {
 
@@ -10,6 +12,8 @@ public interface CustomerService {
     CustomerResponseDTO getCustomerProfile(Long userId);
 
     CustomerResponseDTO updateCustomerProfile(Long userId, CustomerRequestDTO dto);
+    
+    void uploadProfileImage(Long userId, MultipartFile imageFile);
 
     void deleteCustomerProfile(Long userId);
 }

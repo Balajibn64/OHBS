@@ -10,11 +10,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.ohbs.payments.dto.PaymentRequestDTO;
 import com.ohbs.payments.dto.PaymentResponseDTO;
-import com.ohbs.payments.entity.Payment;
 import com.ohbs.payments.exception.DuplicateEntryException;
 import com.ohbs.payments.exception.PaymentCancellationException;
 import com.ohbs.payments.exception.PaymentNotFoundException;
 import com.ohbs.payments.exception.PaymentProcessingException;
+import com.ohbs.payments.model.Payment;
 import com.ohbs.payments.repository.PaymentRepository;
 import com.ohbs.payments.service.PaymentService;
 

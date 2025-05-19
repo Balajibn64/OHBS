@@ -1,11 +1,14 @@
 package com.ohbs.bookings.service;
 
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.ohbs.bookings.dto.BookingRequestDto;
+import com.ohbs.bookings.dto.BookingResponseDto;
 import com.ohbs.bookings.model.Booking;
 import com.ohbs.bookings.model.BookingStatus;
 import com.ohbs.bookings.repository.BookingRepository;
@@ -28,8 +31,10 @@ public class BookingServiceImpl implements BookingService {
     @Autowired
     private RoomRepository roomRepo;
 
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss");
+
     @Override
-    public Booking createBooking(BookingRequestDto dto) {
+    public BookingResponseDto createBooking(BookingRequestDto dto) {
         User customer = userRepo.findById(dto.getCustomerId())
                 .orElseThrow(() -> new ResourceNotFoundException("Customer not found"));
         Room room = roomRepo.findById(dto.getRoomId())
@@ -41,31 +46,33 @@ public class BookingServiceImpl implements BookingService {
         booking.setCheckInDate(dto.getCheckInDate());
         booking.setCheckOutDate(dto.getCheckOutDate());
         booking.setTotalPrice(dto.getTotalPrice());
-        
-        // Important: status is set internally, not from client input
         booking.setStatus(BookingStatus.BOOKED);
 
-        return bookingRepo.save(booking);
+        Booking saved = bookingRepo.save(booking);
+        return mapToDto(saved);
     }
 
     @Override
-    public Booking getBooking(Long id) {
-        return bookingRepo.findById(id)
+    public BookingResponseDto getBooking(Long id) {
+        Booking booking = bookingRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Booking not found"));
+        return mapToDto(booking);
     }
 
     @Override
-    public List<Booking> getBookingsByCustomer(Long customerId) {
-        return bookingRepo.findByCustomerId(customerId);
+    public List<BookingResponseDto> getBookingsByCustomer(Long customerId) {
+        return bookingRepo.findByCustomerId(customerId)
+                .stream().map(this::mapToDto).collect(Collectors.toList());
     }
 
     @Override
-    public List<Booking> getBookingsByRoom(Long roomId) {
-        return bookingRepo.findByRoomId(roomId);
+    public List<BookingResponseDto> getBookingsByRoom(Long roomId) {
+        return bookingRepo.findByRoomId(roomId)
+                .stream().map(this::mapToDto).collect(Collectors.toList());
     }
 
     @Override
-    public Booking updateBooking(Long id, BookingRequestDto dto) {
+    public BookingResponseDto updateBooking(Long id, BookingRequestDto dto) {
         Booking booking = bookingRepo.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Booking not found"));
 
@@ -84,8 +91,8 @@ public class BookingServiceImpl implements BookingService {
         booking.setCheckOutDate(dto.getCheckOutDate());
         booking.setTotalPrice(dto.getTotalPrice());
 
-        // Status cannot be changed here by client
-        return bookingRepo.save(booking);
+        Booking saved = bookingRepo.save(booking);
+        return mapToDto(saved);
     }
 
     @Override
@@ -102,7 +109,6 @@ public class BookingServiceImpl implements BookingService {
 
         booking.setStatus(BookingStatus.CANCELLED);
         bookingRepo.save(booking);
-        // TODO: trigger refund/payment reversal if applicable
     }
 
     @Override
@@ -129,5 +135,24 @@ public class BookingServiceImpl implements BookingService {
 
         booking.setStatus(BookingStatus.COMPLETED);
         bookingRepo.save(booking);
+    }
+
+    // 🔁 Mapping method
+    private BookingResponseDto mapToDto(Booking booking) {
+        return BookingResponseDto.builder()
+                .id(booking.getId())
+                .customerId(booking.getCustomer().getId())
+                .customerName(booking.getCustomer().getUsername() )
+                .roomId(booking.getRoom().getId())
+                .roomNumber(booking.getRoom().getRoomNumber())
+                .roomType(booking.getRoom().getRoomType())
+                .hotelName(booking.getRoom().getHotel().getName())
+                .checkInDate(booking.getCheckInDate())
+                .checkOutDate(booking.getCheckOutDate())
+                .totalPrice(booking.getTotalPrice())
+                .bookingStatus(booking.getStatus())
+                .createdAt(booking.getCreatedAt().format(formatter))
+                .updatedAt(booking.getUpdatedAt().format(formatter))
+                .build();
     }
 }

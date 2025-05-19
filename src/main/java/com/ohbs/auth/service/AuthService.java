@@ -1,5 +1,8 @@
 package com.ohbs.auth.service;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
 import com.ohbs.auth.dto.LoginRequestDTO;
 import com.ohbs.auth.dto.RegisterCustomerDTO;
 import com.ohbs.auth.dto.RegisterManagerDTO;
@@ -10,17 +13,19 @@ import com.ohbs.auth.exception.UserNotFoundException;
 import com.ohbs.common.model.Role;
 import com.ohbs.common.model.User;
 import com.ohbs.common.repository.UserRepository;
+import com.ohbs.manager.exception.ManagerNotFoundException;
+import com.ohbs.manager.model.Manager;
+import com.ohbs.manager.repository.ManagerRepository;
 import com.ohbs.security.jwt.JwtUtil;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
 public class AuthService {
 
 	private final UserRepository userRepository;
+	private final ManagerRepository managerRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final JwtUtil jwtUtil;
 
@@ -71,5 +76,10 @@ public class AuthService {
 						.password(registerDTO.getPassword())
 						.build(),
 				Role.MANAGER);
+	}
+	
+	public Manager getManagerById(Long id) {
+	    return managerRepository.findByIdAndIsDeletedFalse(id)
+	            .orElseThrow(() -> new ManagerNotFoundException("Manager with ID " + id + " not found or is deleted."));
 	}
 }

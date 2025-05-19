@@ -1,4 +1,4 @@
-package com.ohbs.payments.entity;
+package com.ohbs.payments.model;
 
 import java.time.LocalDateTime;
 import jakarta.persistence.*;

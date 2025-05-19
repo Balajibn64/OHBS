@@ -39,7 +39,6 @@ import lombok.RequiredArgsConstructor;
 public class AdminController {
 
     private final AdminService adminService;
-    private final CustomerService customerService;
     private final ManagerService managerService;
     private final CustomerRepository customerRepository;
 
@@ -86,6 +85,8 @@ public class AdminController {
         adminService.deleteAdmin(id);
         return ResponseEntity.noContent().build();
     }
+    
+    
 
     // --------- CUSTOMER MANAGEMENT --------- //
 

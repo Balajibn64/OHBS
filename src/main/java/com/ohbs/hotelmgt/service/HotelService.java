@@ -2,20 +2,23 @@ package com.ohbs.hotelmgt.service;
 
 import com.ohbs.hotelmgt.dto.HotelRequestDTO;
 import com.ohbs.hotelmgt.dto.HotelResponseDTO;
-import com.ohbs.hotelmgt.model.Hotel;
-import com.ohbs.hotelmgt.repository.HotelRepository;
+
 import java.util.List;
 
 public interface HotelService {
 
-    Hotel createHotel(Hotel hotels);
+    // Create a new hotel associated with a manager
+    HotelResponseDTO createHotel(HotelRequestDTO dto, Long managerId);
 
-    Hotel getHotelById(long id);
+    // Get a hotel by ID for a specific manager
+    HotelResponseDTO getHotelById(long id, Long managerId);
 
-    List<Hotel> getAllHotels();
+    // Get all hotels associated with a specific manager
+    List<HotelResponseDTO> getAllHotelsByManager(Long managerId);
 
-    Hotel updateHotel(Hotel hotels);
-    void deleteHotel(Long id);
+    // Update a hotel by ID for a specific manager
+    HotelResponseDTO updateHotel(Long id, HotelRequestDTO dto, Long managerId);
 
+    // Soft-delete a hotel by ID for a specific manager
+    void deleteHotel(Long id, Long managerId);
 }
-

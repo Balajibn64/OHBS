@@ -3,19 +3,19 @@ package com.ohbs.bookings.service;
 import java.util.List;
 
 import com.ohbs.bookings.dto.BookingRequestDto;
-import com.ohbs.bookings.model.Booking;
+import com.ohbs.bookings.dto.BookingResponseDto;
 
 public interface BookingService {
 
-    Booking createBooking(BookingRequestDto dto);
+    BookingResponseDto createBooking(BookingRequestDto dto);
 
-    Booking getBooking(Long id);
+    BookingResponseDto getBooking(Long id);
 
-    List<Booking> getBookingsByCustomer(Long customerId);
+    List<BookingResponseDto> getBookingsByCustomer(Long customerId);
 
-    List<Booking> getBookingsByRoom(Long roomId);
+    List<BookingResponseDto> getBookingsByRoom(Long roomId);
 
-    Booking updateBooking(Long id, BookingRequestDto dto);
+    BookingResponseDto updateBooking(Long id, BookingRequestDto dto);
 
     void cancelBooking(Long id);
 

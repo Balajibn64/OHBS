@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ManagerRepository extends JpaRepository<Manager, Long> {
-	Optional<Manager> findByUserIdAndIsDeletedFalse(Long userId); // ✅ VALID
+	Optional<Manager> findByUserIdAndIsDeletedFalse(Long userId);
+	Optional<Manager> findByUserId(Long userId);
     List<Manager> findAllByIsDeletedFalse();
+    Optional<Manager> findByIdAndIsDeletedFalse(Long id);
+
 }

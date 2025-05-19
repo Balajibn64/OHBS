@@ -1,7 +1,9 @@
 package com.ohbs.payments.repository;
 
-import com.ohbs.payments.entity.Payment;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.ohbs.payments.model.Payment;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 

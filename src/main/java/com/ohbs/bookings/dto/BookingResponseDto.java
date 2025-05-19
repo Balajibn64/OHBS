@@ -5,10 +5,12 @@ import java.time.LocalDate;
 import com.ohbs.bookings.model.BookingStatus;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
 @Schema(description = "Detailed information of a booking response")
+@Builder
 public class BookingResponseDto {
 
     @Schema(description = "Unique identifier of the booking", example = "1")
