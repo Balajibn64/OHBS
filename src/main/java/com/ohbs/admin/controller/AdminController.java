@@ -29,8 +29,6 @@ public class AdminController {
         return ResponseEntity.ok(adminService.create(dto, userId));
     }
 
-
-
     @GetMapping("/{id}")
     public ResponseEntity<AdminResponseDTO> getById(@PathVariable Long id) {
         return ResponseEntity.ok(adminService.getById(id));

@@ -21,7 +21,7 @@ import com.ohbs.auth.service.AuthService;
 import jakarta.validation.Valid;
 
 @RestController
-@CrossOrigin("*")
+@CrossOrigin(origins = "http://localhost:5173")
 @RequestMapping("/auth")
 public class AuthController {
 
