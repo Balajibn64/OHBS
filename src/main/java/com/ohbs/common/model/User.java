@@ -4,11 +4,13 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Data;
 
 @Data
 @Entity
-public class User {
+@Table(name = "users")
+public class User extends Auditable{
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,6 +18,6 @@ public class User {
 	private String username;
 	private String email;
 	private String password;
-	private String phoneNumber;
+//	private String phoneNumber;
 	private Role role;
 }

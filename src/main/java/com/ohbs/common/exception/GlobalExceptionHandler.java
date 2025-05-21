@@ -1,19 +1,12 @@
 package com.ohbs.common.exception;
 
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.springframework.beans.TypeMismatchException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.validation.BindException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import com.ohbs.auth.exception.InvalidCredentialsException;
 import com.ohbs.auth.exception.UserAlreadyExistsException;
@@ -23,11 +16,11 @@ import com.ohbs.hotelmgt.exception.DuplicateHotelNameException;
 import com.ohbs.hotelmgt.exception.HotelImageUploadException;
 import com.ohbs.hotelmgt.exception.HotelNotFoundException;
 import com.ohbs.hotelmgt.exception.InvalidRatingException;
-import com.ohbs.hotelmgt.exception.ValidationErrorException;
-import com.ohbs.hotelmgt.exception.InvalidRequestException;
 import com.ohbs.hotelmgt.exception.RecordNotFoundException;
-
-import com.ohbs.common.dto.ErrorResponse;
+import com.ohbs.hotelmgt.exception.ValidationErrorException;
+import com.ohbs.room.exception.InvalidRoomDataException;
+import com.ohbs.room.exception.RoomAlreadyExistsException;
+import com.ohbs.room.exception.RoomNotAvailableException;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -95,6 +88,30 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<ErrorResponse> handleUnauthorized(
             UnauthorizedException ex,
+            HttpServletRequest req) {
+        ErrorResponse response = new ErrorResponse(
+                HttpStatus.UNAUTHORIZED.value(),
+                ex.getMessage(),
+                req.getRequestURI()
+        );
+        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+    }
+    
+    @ExceptionHandler(InvalidTokenException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidToken(
+            InvalidTokenException ex,
+            HttpServletRequest req) {
+        ErrorResponse response = new ErrorResponse(
+                HttpStatus.UNAUTHORIZED.value(),
+                ex.getMessage(),
+                req.getRequestURI()
+        );
+        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+    }
+    
+    @ExceptionHandler(MissingTokenException.class)
+    public ResponseEntity<ErrorResponse> handleMissingToken(
+    		MissingTokenException ex,
             HttpServletRequest req) {
         ErrorResponse response = new ErrorResponse(
                 HttpStatus.UNAUTHORIZED.value(),
@@ -209,4 +226,34 @@ public class GlobalExceptionHandler {
             ErrorResponse response = new ErrorResponse(status.value(), message, path);
             return new ResponseEntity<>(response, status);
         }
+        
+//       Rooms Exception
+        
+        @ExceptionHandler(RoomAlreadyExistsException.class)
+        public ResponseEntity<ErrorResponse> handleRoomExists(RoomAlreadyExistsException ex, HttpServletRequest request) {
+            return new ResponseEntity<>(new ErrorResponse(
+                    HttpStatus.CONFLICT.value(),
+                    ex.getMessage(),
+                    request.getRequestURI()
+            ), HttpStatus.CONFLICT);
+        }
+
+        @ExceptionHandler(RoomNotAvailableException.class)
+        public ResponseEntity<ErrorResponse> handleRoomUnavailable(RoomNotAvailableException ex, HttpServletRequest request) {
+            return new ResponseEntity<>(new ErrorResponse(
+                    HttpStatus.BAD_REQUEST.value(),
+                    ex.getMessage(),
+                    request.getRequestURI()
+            ), HttpStatus.BAD_REQUEST);
+        }
+
+        @ExceptionHandler(InvalidRoomDataException.class)
+        public ResponseEntity<ErrorResponse> handleInvalidData(InvalidRoomDataException ex, HttpServletRequest request) {
+            return new ResponseEntity<>(new ErrorResponse(
+                    HttpStatus.BAD_REQUEST.value(),
+                    ex.getMessage(),
+                    request.getRequestURI()
+            ), HttpStatus.BAD_REQUEST);
+        }
+
 }

@@ -12,7 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.ohbs.hotelmgt.service.ImageService;
 
 @RestController
-@RequestMapping("/api/images")
+@RequestMapping("/hotel/images")
 public class ImageController {
 
     @Autowired

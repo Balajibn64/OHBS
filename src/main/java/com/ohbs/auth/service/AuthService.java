@@ -36,7 +36,7 @@ public class AuthService {
             throw new UserAlreadyExistsException("Username is already in use.");
         }
 		User user = new User();
-		user.setUsername(registerDTO.getUsername());;
+		user.setUsername(registerDTO.getUsername());
 		user.setEmail(registerDTO.getEmail());
 		user.setPassword(passwordEncoder.encode(registerDTO.getPassword()));
 		user.setRole(Role.CUSTOMER);

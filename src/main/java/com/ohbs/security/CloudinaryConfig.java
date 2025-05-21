@@ -1,4 +1,4 @@
-package com.ohbs.config;
+package com.ohbs.security;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
