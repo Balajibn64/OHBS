@@ -29,40 +29,40 @@ public class ManagerServiceImpl implements ManagerService {
     private final UserRepository userRepository;
     private final Cloudinary cloudinary;
 
-    @Override
-    public ManagerResponseDTO createManagerProfile(ManagerRequestDTO dto, Long userId) {
-        try {
-            User user = userRepository.findById(userId)
-                    .orElseThrow(() -> new ManagerNotFoundException("User not found"));
-
-            Manager existingManager = managerRepository.findByUserId(userId).orElse(null);
-
-            if (existingManager != null) {
-                if (!existingManager.isDeleted()) {
-                    throw new ManagerAlreadyExistsException("Manager profile already exists");
-                } else {
-                    // Restore soft-deleted profile
-                    existingManager.setDeleted(false);
-                    existingManager.setFirstName(dto.getFirstName());
-                    existingManager.setLastName(dto.getLastName());
-                    existingManager.setPhone(dto.getPhone());
-                    return mapToDto(managerRepository.save(existingManager));
-                }
-            }
-
-            Manager manager = Manager.builder()
-                    .user(user)
-                    .firstName(dto.getFirstName())
-                    .lastName(dto.getLastName())
-                    .phone(dto.getPhone())
-                    .isDeleted(false)
-                    .build();
-
-            return mapToDto(managerRepository.save(manager));
-        } catch (Exception e) {
-            throw new ManagerAlreadyExistsException("Manager creation failed");
-        }
-    }
+//    @Override
+//    public ManagerResponseDTO createManagerProfile(ManagerRequestDTO dto, Long userId) {
+//        try {
+//            User user = userRepository.findById(userId)
+//                    .orElseThrow(() -> new ManagerNotFoundException("User not found"));
+//
+//            Manager existingManager = managerRepository.findByUserId(userId).orElse(null);
+//
+//            if (existingManager != null) {
+//                if (!existingManager.isDeleted()) {
+//                    throw new ManagerAlreadyExistsException("Manager profile already exists");
+//                } else {
+//                    // Restore soft-deleted profile
+//                    existingManager.setDeleted(false);
+//                    existingManager.setFirstName(dto.getFirstName());
+//                    existingManager.setLastName(dto.getLastName());
+//                    existingManager.setPhone(dto.getPhone());
+//                    return mapToDto(managerRepository.save(existingManager));
+//                }
+//            }
+//
+//            Manager manager = Manager.builder()
+//                    .user(user)
+//                    .firstName(dto.getFirstName())
+//                    .lastName(dto.getLastName())
+//                    .phone(dto.getPhone())
+//                    .isDeleted(false)
+//                    .build();
+//
+//            return mapToDto(managerRepository.save(manager));
+//        } catch (Exception e) {
+//            throw new ManagerAlreadyExistsException("Manager creation failed");
+//        }
+//    }
 
     @Override
     public ManagerResponseDTO getManagerProfile(Long userId) {

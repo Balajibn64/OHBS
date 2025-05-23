@@ -22,5 +22,5 @@ public class HotelRequestDTO {
     @DecimalMax(value = "5.0", inclusive = true, message = "Rating cannot exceed 5.0")
     private Double rating;
 
-    private String imageUrl;
+//    private String imageUrl;
 }

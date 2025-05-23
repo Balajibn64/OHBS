@@ -8,7 +8,7 @@ import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface ManagerService {
-    ManagerResponseDTO createManagerProfile(ManagerRequestDTO dto, Long userId);
+//    ManagerResponseDTO createManagerProfile(ManagerRequestDTO dto, Long userId);
     ManagerResponseDTO getManagerProfile(Long userId);
     ManagerResponseDTO updateManagerProfile(Long userId, ManagerRequestDTO dto);
     void uploadProfileImage(Long userId, MultipartFile imageFile);

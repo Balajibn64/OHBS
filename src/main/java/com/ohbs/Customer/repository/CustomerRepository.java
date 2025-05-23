@@ -4,7 +4,10 @@ import com.ohbs.Customer.model.Customer;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.lang.NonNull;
 
+import java.util.ArrayList;
 import java.util.Optional;
+import java.util.List;
+
 
 public interface CustomerRepository extends JpaRepository<Customer, Long> {
 
@@ -15,6 +18,8 @@ public interface CustomerRepository extends JpaRepository<Customer, Long> {
     Optional<Customer> findByUserId(Long userId);
     
     Optional<Customer> findByIdAndIsDeletedFalse(Long id);
+    
+    ArrayList<Customer> findByGender(String gender);
 
     
 }

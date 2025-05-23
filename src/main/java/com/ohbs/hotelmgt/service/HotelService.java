@@ -5,20 +5,27 @@ import com.ohbs.hotelmgt.dto.HotelResponseDTO;
 
 import java.util.List;
 
+import com.ohbs.hotelmgt.dto.HotelFilterDTO;
+
+import jakarta.servlet.http.HttpServletRequest;
+
 public interface HotelService {
 
-    // Create a new hotel associated with a manager
-    HotelResponseDTO createHotel(HotelRequestDTO dto, Long managerId);
+    // Get hotels by filter criteria (location, rating, etc.)
+    List<HotelResponseDTO> getHotelByFilter(HotelFilterDTO dto);
 
-    // Get a hotel by ID for a specific manager
-    HotelResponseDTO getHotelById(long id, Long managerId);
+    // Create a new hotel associated with a manager (get manager from token in request)
+    HotelResponseDTO createHotel(HotelRequestDTO dto, HttpServletRequest request);
 
-    // Get all hotels associated with a specific manager
-    List<HotelResponseDTO> getAllHotelsByManager(Long managerId);
+    // Get a hotel by ID for a specific manager (get manager from token in request)
+    HotelResponseDTO getHotelById(long id, HttpServletRequest request);
 
-    // Update a hotel by ID for a specific manager
-    HotelResponseDTO updateHotel(Long id, HotelRequestDTO dto, Long managerId);
+    // Get all hotels associated with a specific manager (get manager from token in request)
+    List<HotelResponseDTO> getAllHotelsByManager(HttpServletRequest request);
 
-    // Soft-delete a hotel by ID for a specific manager
-    void deleteHotel(Long id, Long managerId);
+    // Update a hotel by ID for a specific manager (get manager from token in request)
+    HotelResponseDTO updateHotel(Long id, HotelRequestDTO dto, HttpServletRequest request);
+
+    // Soft-delete a hotel by ID for a specific manager (get manager from token in request)
+    void deleteHotel(Long id, HttpServletRequest request);
 }

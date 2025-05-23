@@ -3,6 +3,8 @@ package com.ohbs.auth.service;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.ohbs.Customer.model.Customer;
+import com.ohbs.Customer.repository.CustomerRepository;
 import com.ohbs.auth.dto.LoginRequestDTO;
 import com.ohbs.auth.dto.RegisterCustomerDTO;
 import com.ohbs.auth.dto.RegisterManagerDTO;
@@ -26,6 +28,7 @@ public class AuthService {
 
 	private final UserRepository userRepository;
 	private final ManagerRepository managerRepository;
+	private final CustomerRepository customerRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final JwtUtil jwtUtil;
 
@@ -59,27 +62,45 @@ public class AuthService {
 		return jwtUtil.generateAccessToken(user);
 	}
 
-	// Optional: keep existing methods if you need them elsewhere
 	public void registerCustomer(RegisterCustomerDTO registerDTO) {
-		registerUser(RegisterUserDTO.builder()
+		User user = registerUser(RegisterUserDTO.builder()
 						.username(registerDTO.getUsername())
 						.email(registerDTO.getEmail())
 						.password(registerDTO.getPassword())
 						.build(),
 				Role.CUSTOMER);
+
+		Customer customer = new Customer();
+		customer.setUser(user);
+		customer.setFirstName(registerDTO.getFirstName() != null ? registerDTO.getFirstName() : null);
+		customer.setLastName(registerDTO.getLastName() != null ? registerDTO.getLastName() : null);
+		customer.setPhone(registerDTO.getPhone() != null ? registerDTO.getPhone() : null);
+		customer.setAddress(registerDTO.getAddress() != null ? registerDTO.getAddress() : null);
+		// Set other fields as needed, or null if not available
+
+		customerRepository.save(customer);
 	}
 
 	public void registerManager(RegisterManagerDTO registerDTO) {
-		registerUser(RegisterUserDTO.builder()
+		User user = registerUser(RegisterUserDTO.builder()
 						.username(registerDTO.getUsername())
 						.email(registerDTO.getEmail())
 						.password(registerDTO.getPassword())
 						.build(),
 				Role.MANAGER);
+
+		Manager manager = new Manager();
+		manager.setUser(user);
+		manager.setFirstName(registerDTO.getFirstName() != null ? registerDTO.getFirstName() : null);
+		manager.setLastName(registerDTO.getLastName() != null ? registerDTO.getLastName() : null);
+		manager.setPhone(registerDTO.getPhone() != null ? registerDTO.getPhone() : null);
+		// Set other fields as needed, or null if not available
+
+		managerRepository.save(manager);
 	}
 	
-	public Manager getManagerById(Long id) {
-	    return managerRepository.findByIdAndIsDeletedFalse(id)
-	            .orElseThrow(() -> new ManagerNotFoundException("Manager with ID " + id + " not found or is deleted."));
-	}
+	// public Manager getManagerById(Long id) {
+	//     return managerRepository.findByIdAndIsDeletedFalse(id)
+	//             .orElseThrow(() -> new ManagerNotFoundException("Manager with ID " + id + " not found or is deleted."));
+	// }
 }

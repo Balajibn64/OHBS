@@ -31,15 +31,15 @@ public class CustomerController {
     private final CustomerService customerService;
     private final JwtUtil jwtUtil;
 
-    @PostMapping
-    @PreAuthorize("hasRole('CUSTOMER')")
-    public ResponseEntity<CustomerResponseDTO> createCustomerProfile(
-            @Valid @RequestBody CustomerRequestDTO dto,
-            HttpServletRequest request) {
-
-        Long userId = extractUserId(request);
-        return ResponseEntity.ok(customerService.createCustomerProfile(dto, userId));
-    }
+//    @PostMapping
+//    @PreAuthorize("hasRole('CUSTOMER')")
+//    public ResponseEntity<CustomerResponseDTO> createCustomerProfile(
+//            @Valid @RequestBody CustomerRequestDTO dto,
+//            HttpServletRequest request) {
+//
+//        Long userId = extractUserId(request);
+//        return ResponseEntity.ok(customerService.createCustomerProfile(dto, userId));
+//    }
 
     @GetMapping
     @PreAuthorize("hasRole('CUSTOMER')")

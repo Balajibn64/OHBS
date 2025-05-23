@@ -27,15 +27,15 @@ public class ManagerController {
     private final ManagerService managerService;
     private final JwtUtil jwtUtil;
 
-    @PostMapping
-    @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<ManagerResponseDTO> createManagerProfile(
-            @Valid @RequestBody ManagerRequestDTO dto,
-            HttpServletRequest request) {
-
-        Long userId = extractUserId(request);
-        return ResponseEntity.ok(managerService.createManagerProfile(dto, userId));
-    }
+//    @PostMapping
+//    @PreAuthorize("hasRole('MANAGER')")
+//    public ResponseEntity<ManagerResponseDTO> createManagerProfile(
+//            @Valid @RequestBody ManagerRequestDTO dto,
+//            HttpServletRequest request) {
+//
+//        Long userId = extractUserId(request);
+//        return ResponseEntity.ok(managerService.createManagerProfile(dto, userId));
+//    }
 
     @GetMapping
     @PreAuthorize("hasRole('MANAGER')")

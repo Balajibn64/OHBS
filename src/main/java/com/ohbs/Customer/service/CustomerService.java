@@ -7,7 +7,7 @@ import com.ohbs.Customer.dto.CustomerResponseDTO;
 
 public interface CustomerService {
 
-    CustomerResponseDTO createCustomerProfile(CustomerRequestDTO dto, Long userId);
+//    CustomerResponseDTO createCustomerProfile(CustomerRequestDTO dto, Long userId);
 
     CustomerResponseDTO getCustomerProfile(Long userId);
 

@@ -1,114 +1,172 @@
 package com.ohbs.hotelmgt.service;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.ohbs.hotelmgt.model.Hotel;
 import com.ohbs.hotelmgt.model.HotelImage;
 import com.ohbs.hotelmgt.repository.HotelImageRepository;
 import com.ohbs.hotelmgt.repository.HotelRepository;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.util.*;
+import com.ohbs.room.model.Room;
+import com.ohbs.room.model.RoomImage;
+import com.ohbs.room.repository.RoomImageRepository;
+import com.ohbs.room.repository.RoomRepository;
 
 @Service
 public class ImageService {
 
-	@Autowired
-	private Cloudinary cloudinary;
+    @Autowired
+    private Cloudinary cloudinary;
 
-	@Autowired
-	private HotelRepository hotelRepository;
+    @Autowired
+    private HotelRepository hotelRepository;
 
-	@Autowired
-	private HotelImageRepository hotelImageRepository;
+    @Autowired
+    private HotelImageRepository hotelImageRepository;
 
-	// Get images by hotelId
-	public List<String> getImagesByHotelId(Long hotelId) {
-		return hotelImageRepository.findByHotelId(hotelId).stream().map(HotelImage::getImageUrl).toList();
-	}
+    @Autowired
+    private RoomRepository roomRepository;
 
-	// Update an image by its ID
-	public String updateImage(Long imageId, MultipartFile newFile) throws IOException {
-		HotelImage image = hotelImageRepository.findById(imageId)
-				.orElseThrow(() -> new IllegalArgumentException("Image not found"));
+    @Autowired
+    private RoomImageRepository roomImageRepository;
 
-		// Upload new image to Cloudinary
-		Map uploadResult = cloudinary.uploader().upload(newFile.getBytes(),
-				ObjectUtils.asMap("folder", "ohbs/hotels/" + image.getHotel().getId(), "public_id",
-						UUID.randomUUID().toString(), "resource_type", "image"));
+    // ===================== HOTEL IMAGE METHODS =====================
 
-		// Optional: Delete the old image from Cloudinary if public_id is stored
-		// cloudinary.uploader().destroy(image.getPublicId(), ObjectUtils.emptyMap());
+    // Upload multiple images for a hotel
+    public List<String> uploadImages(MultipartFile[] files, Long hotelId) throws IOException {
+        Optional<Hotel> optionalHotel = hotelRepository.findById(hotelId);
+        if (optionalHotel.isEmpty()) {
+            throw new IllegalArgumentException("Hotel not found with id: " + hotelId);
+        }
+        Hotel hotel = optionalHotel.get();
+        List<String> imageUrls = new ArrayList<>();
 
-		String newUrl = uploadResult.get("secure_url").toString();
-		image.setImageUrl(newUrl);
-		hotelImageRepository.save(image);
+        for (MultipartFile file : files) {
+            if (file.isEmpty() || !file.getContentType().startsWith("image/")) continue;
+            if (file.getSize() > 5 * 1024 * 1024) continue;
 
-		return newUrl;
-	}
+            Map uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap("folder",
+                    "ohbs/hotels/" + hotelId, "public_id", UUID.randomUUID().toString(), "resource_type", "image"));
 
-	// Delete an image by its ID
-	public void deleteImage(Long imageId) throws IOException {
-		HotelImage image = hotelImageRepository.findById(imageId)
-				.orElseThrow(() -> new IllegalArgumentException("Image not found"));
+            String imageUrl = uploadResult.get("secure_url").toString();
+            imageUrls.add(imageUrl);
 
-		// Optional: Delete from Cloudinary
-		// cloudinary.uploader().destroy(image.getPublicId(), ObjectUtils.emptyMap());
+            HotelImage hotelImage = new HotelImage();
+            hotelImage.setImageUrl(imageUrl);
+            hotelImage.setHotel(hotel);
+            hotelImageRepository.save(hotelImage);
+        }
+        return imageUrls;
+    }
 
+    // Get images by hotelId
+    public List<String> getImagesByHotelId(Long hotelId) {
+        return hotelImageRepository.findByHotelId(hotelId).stream()
+                .map(HotelImage::getImageUrl)
+                .toList();
+    }
+
+    // Update a hotel image by its ID
+    public String updateImage(Long imageId, MultipartFile newFile) throws IOException {
+        HotelImage image = hotelImageRepository.findById(imageId)
+                .orElseThrow(() -> new IllegalArgumentException("Image not found"));
+
+        Map uploadResult = cloudinary.uploader().upload(newFile.getBytes(),
+                ObjectUtils.asMap("folder", "ohbs/hotels/" + image.getHotel().getId(), "public_id",
+                        UUID.randomUUID().toString(), "resource_type", "image"));
+
+        String newUrl = uploadResult.get("secure_url").toString();
+        image.setImageUrl(newUrl);
+        hotelImageRepository.save(image);
+        return newUrl;
+    }
+
+    // Delete a hotel image by its ID
+    public void deleteImage(Long imageId) throws IOException {
+        HotelImage image = hotelImageRepository.findById(imageId)
+                .orElseThrow(() -> new IllegalArgumentException("Image not found"));
 		hotelImageRepository.delete(image);
-	}
+    }
 
-	// Upload multiple images for a hotel
-	public List<String> uploadImages(MultipartFile[] files, Long hotelId) throws IOException {
-		Optional<Hotel> optionalHotel = hotelRepository.findById(hotelId);
+    // ===================== ROOM IMAGE METHODS =====================
 
-		if (optionalHotel.isEmpty()) {
-			throw new IllegalArgumentException("Hotel not found with id: " + hotelId);
-		}
+    // Upload multiple images for a room
+    public List<String> uploadRoomImages(MultipartFile[] files, Long roomId) throws IOException {
+        Optional<Room> optionalRoom = roomRepository.findById(roomId);
+        if (optionalRoom.isEmpty()) {
+            throw new IllegalArgumentException("Room not found with id: " + roomId);
+        }
+        Room room = optionalRoom.get();
+        List<String> imageUrls = new ArrayList<>();
 
-		Hotel hotel = optionalHotel.get();
-		List<String> imageUrls = new ArrayList<>();
+        for (MultipartFile file : files) {
+            if (file.isEmpty() || !file.getContentType().startsWith("image/")) continue;
+            if (file.getSize() > 5 * 1024 * 1024) continue;
 
-		for (MultipartFile file : files) {
-			if (file.isEmpty() || !file.getContentType().startsWith("image/")) {
-				continue;
-			}
+            Map uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap("folder",
+                    "ohbs/rooms/" + roomId, "public_id", UUID.randomUUID().toString(), "resource_type", "image"));
 
-			if (file.getSize() > 5 * 1024 * 1024) {
-				continue;
-			}
+            String imageUrl = uploadResult.get("secure_url").toString();
+            imageUrls.add(imageUrl);
 
-			// Upload the file to Cloudinary
-			Map uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap("folder",
-					"ohbs/hotels/" + hotelId, "public_id", UUID.randomUUID().toString(), "resource_type", "image"));
+            RoomImage roomImage = new RoomImage();
+            roomImage.setImageUrl(imageUrl);
+            roomImage.setRoom(room);
+            roomImageRepository.save(roomImage);
+        }
+        return imageUrls;
+    }
 
-			String imageUrl = uploadResult.get("secure_url").toString();
-			imageUrls.add(imageUrl);
+    // Get images by roomId
+    public List<String> getImagesByRoomId(Long roomId) {
+        return roomImageRepository.findByRoomId(roomId)
+                .stream()
+                .map(RoomImage::getImageUrl)
+                .toList();
+    }
 
-			// Create a new HotelImage entity and associate it with the hotel
-			HotelImage hotelImage = new HotelImage();
-			hotelImage.setImageUrl(imageUrl);
-			hotelImage.setHotel(hotel);
+    // Update a room image by its ID
+    public String updateRoomImage(Long imageId, MultipartFile newFile) throws IOException {
+        RoomImage image = roomImageRepository.findById(imageId)
+                .orElseThrow(() -> new IllegalArgumentException("Room image not found"));
 
-			// Save the HotelImage to the database
-			hotelImageRepository.save(hotelImage);
-		}
+        Map uploadResult = cloudinary.uploader().upload(newFile.getBytes(),
+                ObjectUtils.asMap("folder", "ohbs/rooms/" + image.getRoom().getId(), "public_id",
+                        UUID.randomUUID().toString(), "resource_type", "image"));
 
-		return imageUrls;
-	}
+        String newUrl = uploadResult.get("secure_url").toString();
+        image.setImageUrl(newUrl);
+        roomImageRepository.save(image);
+        return newUrl;
+    }
 
-	public String uploadProfileImage(MultipartFile file, Long userId) throws IOException {
-		if (file.isEmpty() || !file.getContentType().startsWith("image/")) {
-			throw new IllegalArgumentException("Invalid image file");
-		}
+    // Delete a room image by its ID
+    public void deleteRoomImage(Long imageId) throws IOException {
+        RoomImage image = roomImageRepository.findById(imageId)
+                .orElseThrow(() -> new IllegalArgumentException("Room image not found"));
+        roomImageRepository.delete(image);
+    }
 
-		Map uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap("folder",
-				"ohbs/customers/" + userId, "public_id", UUID.randomUUID().toString(), "resource_type", "image"));
+    // ===================== PROFILE IMAGE METHOD =====================
 
-		return uploadResult.get("secure_url").toString();
-	}
+    public String uploadProfileImage(MultipartFile file, Long userId) throws IOException {
+        if (file.isEmpty() || !file.getContentType().startsWith("image/")) {
+            throw new IllegalArgumentException("Invalid image file");
+        }
+
+        Map uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.asMap("folder",
+                "ohbs/customers/" + userId, "public_id", UUID.randomUUID().toString(), "resource_type", "image"));
+
+        return uploadResult.get("secure_url").toString();
+    }
 }

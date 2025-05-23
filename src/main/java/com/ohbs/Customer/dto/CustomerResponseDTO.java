@@ -1,11 +1,9 @@
 package com.ohbs.Customer.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -34,4 +32,10 @@ public class CustomerResponseDTO {
 
     @Schema(description = "Profile image URL of the customer")
     private String profileImageUrl;
+
+    @Schema(description = "Date of birth of the customer")
+    private LocalDate dob;
+
+    @Schema(description = "Gender of the customer (Male, Female, or Other)")
+    private String gender;
 }

@@ -8,12 +8,14 @@ import org.springframework.stereotype.Service;
 import com.ohbs.common.exception.ResourceNotFoundException;
 import com.ohbs.hotelmgt.model.Hotel;
 import com.ohbs.hotelmgt.repository.HotelRepository;
+import com.ohbs.hotelmgt.service.ImageService;
 import com.ohbs.room.dto.RoomRequestDTO;
 import com.ohbs.room.dto.RoomResponseDTO;
 import com.ohbs.room.exception.InvalidRoomDataException;
 import com.ohbs.room.exception.RoomAlreadyExistsException;
 import com.ohbs.room.exception.RoomNotAvailableException;
 import com.ohbs.room.model.Room;
+import com.ohbs.room.model.RoomImage;
 import com.ohbs.room.repository.RoomRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,7 @@ public class RoomServiceImpl implements RoomService {
 
     private final RoomRepository roomRepository;
     private final HotelRepository hotelRepository;
+    private final ImageService imageService; // Inject ImageService
 
     @Override
     public RoomResponseDTO createRoom(RoomRequestDTO dto) {
@@ -50,14 +53,19 @@ public class RoomServiceImpl implements RoomService {
                 .isAvailable(dto.getIsAvailable() != null && dto.getIsAvailable())
                 .build();
 
-        return mapToDTO(roomRepository.save(room));
+        Room savedRoom = roomRepository.save(room);
+
+        // Handle room images if provided in DTO (assuming you add a List<MultipartFile> images to DTO)
+        // Example: List<String> imageUrls = imageService.uploadRoomImages(dto.getImages(), savedRoom.getId());
+
+        return mapToDTO(savedRoom);
     }
 
     @Override
     public RoomResponseDTO getRoom(Long id) {
         Room room = roomRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Room not found with id: " + id));
-        return mapToDTO(room);
+        return mapToDTOWithImages(room);
     }
 
     @Override
@@ -69,7 +77,7 @@ public class RoomServiceImpl implements RoomService {
 
         return roomRepository.findByHotelIdAndIsAvailableTrue(hotelId)
                 .stream()
-                .map(this::mapToDTO)
+                .map(this::mapToDTOWithImages)
                 .collect(Collectors.toList());
     }
 
@@ -120,6 +128,25 @@ public class RoomServiceImpl implements RoomService {
                 .isAvailable(room.isAvailable())
                 .hotelId(room.getHotel().getId())
                 .hotelName(room.getHotel().getName())
+                .build();
+    }
+
+    // New: Map with images
+    private RoomResponseDTO mapToDTOWithImages(Room room) {
+        List<String> imageUrls = room.getRoomImages() != null
+                ? room.getRoomImages().stream().map(RoomImage::getImageUrl).collect(Collectors.toList())
+                : List.of();
+
+        return RoomResponseDTO.builder()
+                .id(room.getId())
+                .roomNumber(room.getRoomNumber())
+                .roomType(room.getRoomType())
+                .pricePerDay(room.getPricePerDay())
+                .description(room.getDescription())
+                .isAvailable(room.isAvailable())
+                .hotelId(room.getHotel().getId())
+                .hotelName(room.getHotel().getName())
+                .imageUrls(imageUrls)
                 .build();
     }
 }

@@ -9,6 +9,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.ohbs.manager.model.Manager;
+import com.ohbs.room.model.Room;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -56,6 +57,10 @@ public class Hotel {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "manager_id", nullable = false)
     private Manager manager;
+
+    @OneToMany(mappedBy = "hotel", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonManagedReference
+    private List<Room> rooms;
 
     @DecimalMin(value = "1.0", inclusive = true, message = "Rating must be at least 1.0")
     @DecimalMax(value = "5.0", inclusive = true, message = "Rating cannot exceed 5.0")
