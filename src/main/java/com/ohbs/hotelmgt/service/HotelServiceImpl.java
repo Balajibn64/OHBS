@@ -44,10 +44,12 @@ public class HotelServiceImpl implements HotelService {
     @Override
     public List<HotelResponseDTO> getHotelByFilter(HotelFilterDTO dto) {
         if(dto.getSortBy().equalsIgnoreCase("asc")) {
+        	System.out.println(dto.getSortBy().equalsIgnoreCase("asc"));
             List<HotelResponseDTO> hotels = hotelRepository.findByLocationOrderByPriceAsc(dto.getLocation())
                     .stream()
                     .map(HotelResponseDTO::fromEntity)
                     .collect(Collectors.toList());
+            System.out.println(hotelRepository.findByLocationOrderByPriceAsc(dto.getLocation()));
             return hotels;
         }else {
         	List<HotelResponseDTO> hotels = hotelRepository.findByLocationOrderByPriceDesc(dto.getLocation())

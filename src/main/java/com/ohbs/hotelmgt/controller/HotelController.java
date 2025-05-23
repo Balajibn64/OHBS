@@ -23,7 +23,7 @@ public class HotelController {
     @Autowired
     private HotelService hotelService;
 
-    @GetMapping("path")
+    @GetMapping("/filter")
     public ResponseEntity<List<HotelResponseDTO>> getHotelByFilter(@RequestBody HotelFilterDTO dto) {
         return ResponseEntity.ok(hotelService.getHotelByFilter(dto));
     }
