@@ -16,6 +16,8 @@ import com.ohbs.common.exception.BadRequestException;
 import com.ohbs.common.exception.ResourceNotFoundException;
 import com.ohbs.common.model.User;
 import com.ohbs.common.repository.UserRepository;
+import com.ohbs.payments.dto.PaymentResponseDTO;
+import com.ohbs.payments.model.Payment;
 import com.ohbs.room.model.Room;
 import com.ohbs.room.repository.RoomRepository;
 
@@ -54,14 +56,14 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public BookingResponseDto getBooking(Long id) {
-        Booking booking = bookingRepo.findById(id)
+        Booking booking = bookingRepo.findByIdWithPayment(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Booking not found"));
         return mapToDto(booking);
     }
 
     @Override
     public List<BookingResponseDto> getBookingsByCustomer(Long customerId) {
-        return bookingRepo.findByCustomerId(customerId)
+        return bookingRepo.findByCustomerIdWithPayment(customerId)
                 .stream().map(this::mapToDto).collect(Collectors.toList());
     }
 
@@ -142,7 +144,7 @@ public class BookingServiceImpl implements BookingService {
         return BookingResponseDto.builder()
                 .id(booking.getId())
                 .customerId(booking.getCustomer().getId())
-                .customerName(booking.getCustomer().getUsername() )
+                .customerName(booking.getCustomer().getUsername())
                 .roomId(booking.getRoom().getId())
                 .roomNumber(booking.getRoom().getRoomNumber())
                 .roomType(booking.getRoom().getRoomType())
@@ -153,6 +155,17 @@ public class BookingServiceImpl implements BookingService {
                 .bookingStatus(booking.getStatus())
                 .createdAt(booking.getCreatedAt().format(formatter))
                 .updatedAt(booking.getUpdatedAt().format(formatter))
+                .payment(mapToPaymentResponseDTO(booking.getPayment())) // Add payment details to DTO
+                .build();
+    }
+
+    private PaymentResponseDTO mapToPaymentResponseDTO(Payment payment) {
+        if (payment == null) return null;
+        return PaymentResponseDTO.builder()
+                .id(payment.getId())
+                .bookingId(payment.getBooking() != null ? payment.getBooking().getId() : null)
+                .paymentDate(payment.getPaymentDate())
+                // Add more fields as needed from PaymentResponseDTO and Payment entity
                 .build();
     }
 }

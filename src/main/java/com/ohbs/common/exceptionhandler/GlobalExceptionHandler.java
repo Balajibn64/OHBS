@@ -13,6 +13,7 @@ import com.ohbs.Customer.exception.InvalidCustomerDataException;
 import com.ohbs.Customer.exception.OperationNotAllowedException;
 import com.ohbs.Customer.exception.UnauthorizedAccessException;
 import com.ohbs.Customer.exception.UserAlreadyHasCustomerProfileException;
+import com.ohbs.admin.exception.AdminNotFoundException;
 import com.ohbs.auth.exception.InvalidCredentialsException;
 import com.ohbs.auth.exception.UserAlreadyExistsException;
 import com.ohbs.auth.exception.UserNotFoundException;
@@ -45,6 +46,7 @@ import com.ohbs.room.exception.RoomAlreadyExistsException;
 import com.ohbs.room.exception.RoomNotAvailableException;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -154,6 +156,15 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
     
+    @ExceptionHandler(org.springframework.web.HttpRequestMethodNotSupportedException.class)
+    public ResponseEntity<ErrorResponse> handleMethodNotSupported(org.springframework.web.HttpRequestMethodNotSupportedException ex, HttpServletRequest req) {
+        ErrorResponse response = new ErrorResponse(
+                HttpStatus.METHOD_NOT_ALLOWED.value(),
+                "Request method '" + ex.getMethod() + "' is not supported for this endpoint.",
+                req.getRequestURI()
+        );
+        return new ResponseEntity<>(response, HttpStatus.METHOD_NOT_ALLOWED);
+    }
     
     //Customer Exceptions Handler
     
@@ -324,6 +335,21 @@ public class GlobalExceptionHandler {
             return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
         }
         
+        @ExceptionHandler(ConstraintViolationException.class)
+        public ResponseEntity<ErrorResponse> handleConstraintViolation(
+                jakarta.validation.ConstraintViolationException ex, HttpServletRequest req) {
+            StringBuilder errorMessage = new StringBuilder("Validation failed: ");
+            ex.getConstraintViolations().forEach(violation -> {
+                errorMessage.append(String.format("[%s: %s] ", violation.getPropertyPath(), violation.getMessage()));
+            });
+            ErrorResponse response = new ErrorResponse(
+                    HttpStatus.BAD_REQUEST.value(),
+                    errorMessage.toString(),
+                    req.getRequestURI()
+            );
+            return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        }
+        
         private ResponseEntity<ErrorResponse> buildResponseEntity(HttpStatus status, String message, String path) {
             ErrorResponse response = new ErrorResponse(status.value(), message, path);
             return new ResponseEntity<>(response, status);
@@ -382,4 +408,25 @@ public class GlobalExceptionHandler {
         public ResponseEntity<ErrorResponse> handleDuplicateEntry(DuplicateEntryException ex, HttpServletRequest req) {
         	return buildResponseEntity(HttpStatus.CONFLICT, ex.getMessage(), req.getRequestURI());
         }
+        
+//       Admin Exception Handlers
+        @ExceptionHandler(AdminNotFoundException.class)
+        public ResponseEntity<ErrorResponse> handleAdminNotFound(com.ohbs.admin.exception.AdminNotFoundException ex, HttpServletRequest req) {
+            return buildResponseEntity(HttpStatus.NOT_FOUND, ex.getMessage(), req.getRequestURI());
+        }
+
+//        @ExceptionHandler(AdminAlreadyExistsException.class)
+//        public ResponseEntity<ErrorResponse> handleAdminAlreadyExists(com.ohbs.admin.exception.AdminAlreadyExistsException ex, HttpServletRequest req) {
+//            return buildResponseEntity(HttpStatus.CONFLICT, ex.getMessage(), req.getRequestURI());
+//        }
+//
+//        @ExceptionHandler(AdminUpdateException.class)
+//        public ResponseEntity<ErrorResponse> handleAdminUpdateException(com.ohbs.admin.exception.AdminUpdateException ex, HttpServletRequest req) {
+//            return buildResponseEntity(HttpStatus.BAD_REQUEST, ex.getMessage(), req.getRequestURI());
+//        }
+//
+//        @ExceptionHandler(AdminDeletionException.class)
+//        public ResponseEntity<ErrorResponse> handleAdminDeletionException(com.ohbs.admin.exception.AdminDeletionException ex, HttpServletRequest req) {
+//            return buildResponseEntity(HttpStatus.BAD_REQUEST, ex.getMessage(), req.getRequestURI());
+//        }
 }

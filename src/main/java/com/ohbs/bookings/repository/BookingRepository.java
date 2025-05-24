@@ -6,6 +6,8 @@ import com.ohbs.bookings.model.Booking;
 import com.ohbs.bookings.model.BookingStatus;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface BookingRepository extends JpaRepository<Booking, Long> {
 
@@ -18,4 +20,10 @@ public interface BookingRepository extends JpaRepository<Booking, Long> {
     Optional<Booking> findByCustomerIdAndRoomId(Long customerId, Long roomId);
     
     List<Booking> findByCustomerIdAndStatus(Long customerId, BookingStatus status); // Additional for status by customer
+
+    @Query("SELECT b FROM Booking b LEFT JOIN FETCH b.payment WHERE b.id = :id")
+    Optional<Booking> findByIdWithPayment(@Param("id") Long id);
+
+    @Query("SELECT b FROM Booking b LEFT JOIN FETCH b.payment WHERE b.customer.id = :customerId")
+    List<Booking> findByCustomerIdWithPayment(@Param("customerId") Long customerId);
 }

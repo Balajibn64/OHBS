@@ -15,6 +15,9 @@ public class CustomerResponseDTO {
     @Schema(description = "Customer ID")
     private Long id;
 
+    @Schema(description = "User ID associated with the customer")
+    private Long userId;
+
     @Schema(description = "First name of the customer")
     private String firstName;
 
@@ -38,4 +41,7 @@ public class CustomerResponseDTO {
 
     @Schema(description = "Gender of the customer (Male, Female, or Other)")
     private String gender;
+
+    @Schema(description = "Username of the customer")
+    private String username;
 }

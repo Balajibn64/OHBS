@@ -15,5 +15,5 @@ public class ManagerRequestDTO {
     @Pattern(regexp = "\\d{10}", message = "Phone number must be exactly 10 digits")
     private String phone;
 
-    private Long hotelId;
+    // private Long hotelId;
 }

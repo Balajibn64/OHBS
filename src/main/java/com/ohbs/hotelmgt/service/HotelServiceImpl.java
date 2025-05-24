@@ -4,11 +4,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import com.ohbs.Customer.exception.UnauthorizedAccessException;
 import com.ohbs.auth.service.AuthService;
@@ -25,6 +21,8 @@ import com.ohbs.manager.repository.ManagerRepository;
 import com.ohbs.security.jwt.JwtUtil;
 
 import jakarta.servlet.http.HttpServletRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class HotelServiceImpl implements HotelService {
@@ -43,22 +41,30 @@ public class HotelServiceImpl implements HotelService {
 
     @Override
     public List<HotelResponseDTO> getHotelByFilter(HotelFilterDTO dto) {
-        if(dto.getSortBy().equalsIgnoreCase("asc")) {
-        	System.out.println(dto.getSortBy().equalsIgnoreCase("asc"));
-            List<HotelResponseDTO> hotels = hotelRepository.findByLocationOrderByPriceAsc(dto.getLocation())
-                    .stream()
-                    .map(HotelResponseDTO::fromEntity)
-                    .collect(Collectors.toList());
-            System.out.println(hotelRepository.findByLocationOrderByPriceAsc(dto.getLocation()));
-            return hotels;
-        }else {
-        	List<HotelResponseDTO> hotels = hotelRepository.findByLocationOrderByPriceDesc(dto.getLocation())
-                    .stream()
-                    .map(HotelResponseDTO::fromEntity)
-                    .collect(Collectors.toList());
-            return hotels;
+        if (dto.getSortBy() == null || dto.getLocation() == null) {
+            throw new IllegalArgumentException("SortBy and Location cannot be null");
         }
+
+        Double minRating = dto.getMinRating(); // already Double, no need to parse
+        Double maxRating = dto.getMaxRating();
+
+        List<Hotel> hotels;
+
+        if ("asc".equalsIgnoreCase(dto.getSortBy())) {
+            hotels = hotelRepository.findByLocationAndRatingRangeOrderByPriceAsc(dto.getLocation(), minRating, maxRating);
+        } else if ("desc".equalsIgnoreCase(dto.getSortBy())) {
+            hotels = hotelRepository.findByLocationAndRatingRangeOrderByPriceDesc(dto.getLocation(), minRating, maxRating);
+        } else {
+            throw new IllegalArgumentException("Invalid sort order. Use 'asc' or 'desc'.");
+        }
+
+        return hotels.stream()
+                     .map(HotelResponseDTO::fromEntity)
+                     .collect(Collectors.toList());
     }
+
+
+
 
     @Override
     public HotelResponseDTO createHotel(HotelRequestDTO dto, HttpServletRequest request) {

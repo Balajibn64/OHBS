@@ -26,4 +26,10 @@ public class AdminResponseDTO {
 
     @Schema(description = "Username of the admin", example = "john_admin")
     private String username;
+
+    @Schema(description = "Unique identifier of the user associated with the admin", example = "10")
+    private Long userId;
+
+    @Schema(description = "Profile image URL of the admin", example = "https://example.com/images/admin1.jpg")
+    private String profileImageUrl;
 }

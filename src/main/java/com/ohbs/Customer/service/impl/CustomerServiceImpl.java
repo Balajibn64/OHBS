@@ -11,8 +11,6 @@ import com.cloudinary.utils.ObjectUtils;
 import com.ohbs.Customer.dto.CustomerRequestDTO;
 import com.ohbs.Customer.dto.CustomerResponseDTO;
 import com.ohbs.Customer.exception.CustomerNotFoundException;
-import com.ohbs.Customer.exception.UserAlreadyHasCustomerProfileException;
-import com.ohbs.Customer.exception.UserNotFoundException;
 import com.ohbs.Customer.model.Customer;
 import com.ohbs.Customer.repository.CustomerRepository;
 import com.ohbs.Customer.service.CustomerService;

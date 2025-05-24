@@ -3,6 +3,7 @@ package com.ohbs.bookings.dto;
 import java.time.LocalDate;
 
 import com.ohbs.bookings.model.BookingStatus;
+import com.ohbs.payments.dto.PaymentResponseDTO;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Builder;
@@ -48,6 +49,9 @@ public class BookingResponseDto {
             type = "string", 
             allowableValues = {"PENDING", "CONFIRMED", "CANCELLED", "COMPLETED"})
     private BookingStatus bookingStatus;
+
+    @Schema(description = "Payment details for the booking")
+    private PaymentResponseDTO payment;
 
     @Schema(description = "The date and time when the booking was created", example = "2025-05-15T10:15:30")
     private String createdAt;
