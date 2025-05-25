@@ -1,4 +1,4 @@
-package com.ohbs.common.exception;
+package com.ohbs.common.exceptionhandler;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -8,22 +8,43 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import com.ohbs.Customer.exception.CustomerNotFoundException;
+import com.ohbs.Customer.exception.InvalidCustomerDataException;
+import com.ohbs.Customer.exception.OperationNotAllowedException;
+import com.ohbs.Customer.exception.UnauthorizedAccessException;
+import com.ohbs.Customer.exception.UserAlreadyHasCustomerProfileException;
 import com.ohbs.auth.exception.InvalidCredentialsException;
 import com.ohbs.auth.exception.UserAlreadyExistsException;
 import com.ohbs.auth.exception.UserNotFoundException;
 import com.ohbs.common.dto.ErrorResponse;
+import com.ohbs.common.exception.InvalidTokenException;
+import com.ohbs.common.exception.MissingTokenException;
+import com.ohbs.common.exception.ResourceNotFoundException;
+import com.ohbs.common.exception.UnauthorizedException;
 import com.ohbs.hotelmgt.exception.DuplicateHotelNameException;
 import com.ohbs.hotelmgt.exception.HotelImageUploadException;
 import com.ohbs.hotelmgt.exception.HotelNotFoundException;
 import com.ohbs.hotelmgt.exception.InvalidRatingException;
 import com.ohbs.hotelmgt.exception.RecordNotFoundException;
 import com.ohbs.hotelmgt.exception.ValidationErrorException;
+import com.ohbs.manager.exception.InvalidManagerUpdateException;
+import com.ohbs.manager.exception.ManagerAccessDeniedException;
+import com.ohbs.manager.exception.ManagerAlreadyAssignedException;
+import com.ohbs.manager.exception.ManagerAlreadyExistsException;
+import com.ohbs.manager.exception.ManagerAssignmentException;
+import com.ohbs.manager.exception.ManagerDeletionException;
+import com.ohbs.manager.exception.ManagerHotelMismatchException;
+import com.ohbs.manager.exception.ManagerInactiveException;
+import com.ohbs.manager.exception.ManagerNotFoundException;
+import com.ohbs.payments.exception.DuplicateEntryException;
+import com.ohbs.payments.exception.PaymentCancellationException;
+import com.ohbs.payments.exception.PaymentNotFoundException;
+import com.ohbs.payments.exception.PaymentProcessingException;
 import com.ohbs.room.exception.InvalidRoomDataException;
 import com.ohbs.room.exception.RoomAlreadyExistsException;
 import com.ohbs.room.exception.RoomNotAvailableException;
 
 import jakarta.servlet.http.HttpServletRequest;
-
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -131,6 +152,96 @@ public class GlobalExceptionHandler {
                 req.getRequestURI()
         );
         return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+    
+    
+    //Customer Exceptions Handler
+    
+    @ExceptionHandler(CustomerNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleCustomerNotFound(
+            CustomerNotFoundException ex, HttpServletRequest req) {
+        return buildResponseEntity(HttpStatus.NOT_FOUND, ex.getMessage(), req.getRequestURI());
+    }
+
+    @ExceptionHandler(UserAlreadyHasCustomerProfileException.class)
+    public ResponseEntity<ErrorResponse> handleProfileExists(
+            UserAlreadyHasCustomerProfileException ex, HttpServletRequest req) {
+        return buildResponseEntity(HttpStatus.BAD_REQUEST, ex.getMessage(), req.getRequestURI());
+    }
+
+    @ExceptionHandler(UnauthorizedAccessException.class)
+    public ResponseEntity<ErrorResponse> handleUnauthorized(
+            UnauthorizedAccessException ex, HttpServletRequest req) {
+        return buildResponseEntity(HttpStatus.UNAUTHORIZED, ex.getMessage(), req.getRequestURI());
+    }
+
+    @ExceptionHandler(InvalidCustomerDataException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidData(
+            InvalidCustomerDataException ex, HttpServletRequest req) {
+        return buildResponseEntity(HttpStatus.BAD_REQUEST, ex.getMessage(), req.getRequestURI());
+    }
+
+    @ExceptionHandler(OperationNotAllowedException.class)
+    public ResponseEntity<ErrorResponse> handleOperationNotAllowed(
+            OperationNotAllowedException ex, HttpServletRequest req) {
+        return buildResponseEntity(HttpStatus.FORBIDDEN, ex.getMessage(), req.getRequestURI());
+    }
+    
+ // ─────────────────────────────────────────────
+    // MANAGER EXCEPTIONS
+    // ─────────────────────────────────────────────
+    @ExceptionHandler(ManagerNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleManagerNotFound(
+            ManagerNotFoundException ex, HttpServletRequest req) {
+        return buildResponseEntity(HttpStatus.NOT_FOUND, ex.getMessage(), req.getRequestURI());
+    }
+
+    @ExceptionHandler(ManagerAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleManagerAlreadyExists(
+            ManagerAlreadyExistsException ex, HttpServletRequest req) {
+        return buildResponseEntity(HttpStatus.CONFLICT, ex.getMessage(), req.getRequestURI());
+    }
+
+    @ExceptionHandler(InvalidManagerUpdateException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidManagerUpdate(
+            InvalidManagerUpdateException ex, HttpServletRequest req) {
+        return buildResponseEntity(HttpStatus.BAD_REQUEST, ex.getMessage(), req.getRequestURI());
+    }
+
+    @ExceptionHandler(ManagerDeletionException.class)
+    public ResponseEntity<ErrorResponse> handleManagerDeletion(
+            ManagerDeletionException ex, HttpServletRequest req) {
+        return buildResponseEntity(HttpStatus.BAD_REQUEST, ex.getMessage(), req.getRequestURI());
+    }
+
+    @ExceptionHandler(ManagerAssignmentException.class)
+    public ResponseEntity<ErrorResponse> handleManagerAssignment(
+            ManagerAssignmentException ex, HttpServletRequest req) {
+        return buildResponseEntity(HttpStatus.BAD_REQUEST, ex.getMessage(), req.getRequestURI());
+    }
+
+    @ExceptionHandler(ManagerAccessDeniedException.class)
+    public ResponseEntity<ErrorResponse> handleManagerAccessDenied(
+            ManagerAccessDeniedException ex, HttpServletRequest req) {
+        return buildResponseEntity(HttpStatus.FORBIDDEN, ex.getMessage(), req.getRequestURI());
+    }
+
+    @ExceptionHandler(ManagerAlreadyAssignedException.class)
+    public ResponseEntity<ErrorResponse> handleManagerAlreadyAssigned(
+            ManagerAlreadyAssignedException ex, HttpServletRequest req) {
+        return buildResponseEntity(HttpStatus.CONFLICT, ex.getMessage(), req.getRequestURI());
+    }
+
+    @ExceptionHandler(ManagerHotelMismatchException.class)
+    public ResponseEntity<ErrorResponse> handleManagerHotelMismatch(
+            ManagerHotelMismatchException ex, HttpServletRequest req) {
+        return buildResponseEntity(HttpStatus.BAD_REQUEST, ex.getMessage(), req.getRequestURI());
+    }
+
+    @ExceptionHandler(ManagerInactiveException.class)
+    public ResponseEntity<ErrorResponse> handleManagerInactive(
+            ManagerInactiveException ex, HttpServletRequest req) {
+        return buildResponseEntity(HttpStatus.FORBIDDEN, ex.getMessage(), req.getRequestURI());
     }
     
 //    Hotel Exception
@@ -255,5 +366,29 @@ public class GlobalExceptionHandler {
                     request.getRequestURI()
             ), HttpStatus.BAD_REQUEST);
         }
+        
+     
+        
+        
+//       PAYMENTS EXPCEPTIONS HANDLERS
+        
+        @ExceptionHandler(PaymentNotFoundException.class)
+        public ResponseEntity<ErrorResponse> handlePaymentNotFound(PaymentNotFoundException ex, HttpServletRequest req) {
+            return buildResponseEntity(HttpStatus.NOT_FOUND, ex.getMessage(), req.getRequestURI());
+        }
 
+        @ExceptionHandler(PaymentProcessingException.class)
+        public ResponseEntity<ErrorResponse> handlePaymentProcessing(PaymentProcessingException ex, HttpServletRequest req) {
+            return buildResponseEntity(HttpStatus.BAD_REQUEST, ex.getMessage(), req.getRequestURI());
+        }
+
+        @ExceptionHandler(PaymentCancellationException.class)
+        public ResponseEntity<ErrorResponse> handlePaymentCancellation(PaymentCancellationException ex, HttpServletRequest req) {
+            return buildResponseEntity(HttpStatus.BAD_REQUEST, ex.getMessage(), req.getRequestURI());
+        }
+        
+        @ExceptionHandler(DuplicateEntryException.class)
+        public ResponseEntity<ErrorResponse> handleDuplicateEntry(DuplicateEntryException ex, HttpServletRequest req) {
+        	return buildResponseEntity(HttpStatus.CONFLICT, ex.getMessage(), req.getRequestURI());
+        }
 }

@@ -31,9 +31,7 @@ build/
 
 ### VS Code ###
 .vscode/
-<<<<<<< HEAD
-=======
 
 ### env file ###
 .env
->>>>>>> 02d2c82 (Login and Register Codes)
+/.apt_generated_tests/

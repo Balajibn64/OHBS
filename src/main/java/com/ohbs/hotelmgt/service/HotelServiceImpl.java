@@ -1,16 +1,22 @@
 package com.ohbs.hotelmgt.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.ohbs.Customer.exception.UnauthorizedAccessException;
+import com.ohbs.auth.service.AuthService;
+import com.ohbs.hotelmgt.dto.HotelRequestDTO;
+import com.ohbs.hotelmgt.dto.HotelResponseDTO;
 import com.ohbs.hotelmgt.exception.DuplicateHotelNameException;
 import com.ohbs.hotelmgt.exception.HotelNotFoundException;
 import com.ohbs.hotelmgt.exception.InvalidRatingException;
 import com.ohbs.hotelmgt.model.Hotel;
 import com.ohbs.hotelmgt.model.HotelImage;
 import com.ohbs.hotelmgt.repository.HotelRepository;
+import com.ohbs.manager.model.Manager;
 
 @Service
 public class HotelServiceImpl implements HotelService {
@@ -18,41 +24,67 @@ public class HotelServiceImpl implements HotelService {
     @Autowired
     private HotelRepository hotelRepository;
 
+    @Autowired
+    private AuthService authService;
+
     @Override
-    public Hotel createHotel(Hotel hotel) {
-        if (hotelRepository.findByName(hotel.getName()) != null) {
-            throw new DuplicateHotelNameException("Hotel with name '" + hotel.getName() + "' already exists.");
+    public HotelResponseDTO createHotel(HotelRequestDTO dto, Long managerId) {
+        if (hotelRepository.findByName(dto.getName()) != null) {
+            throw new DuplicateHotelNameException("Hotel with name '" + dto.getName() + "' already exists.");
         }
 
-        validateRating(hotel.getRating());
+        if (dto.getRating() < 1.0 || dto.getRating() > 5.0) {
+            throw new InvalidRatingException("Rating must be between 1.0 and 5.0.");
+        }
+
+        Manager manager = authService.getManagerById(managerId);
+
+        Hotel hotel = Hotel.builder()
+                .name(dto.getName())
+                .description(dto.getDescription())
+                .location(dto.getLocation())
+                .rating(dto.getRating())
+                .manager(manager)
+                .isDeleted(false)
+                .build();
 
         if (hotel.getImages() != null) {
             for (HotelImage image : hotel.getImages()) {
-                image.setHotel(hotel); // 🔗 Link images to hotel
+                image.setHotel(hotel);
             }
         }
 
-        return hotelRepository.save(hotel);
+        return HotelResponseDTO.fromEntity(hotelRepository.save(hotel));
     }
 
     @Override
-    public Hotel getHotelById(long id) {
-        return hotelRepository.findByIdAndIsDeletedFalse(id)
-                .orElseThrow(() -> new HotelNotFoundException("Hotel with ID " + id + " not found"));
+    public HotelResponseDTO getHotelById(long id, Long managerId) {
+        Hotel hotel = getActiveHotelOrThrow(id);
+        validateOwnership(hotel, managerId);
+        return HotelResponseDTO.fromEntity(hotel);
     }
 
     @Override
-    public List<Hotel> getAllHotels() {
-        return hotelRepository.findByIsDeletedFalse();
+    public List<HotelResponseDTO> getAllHotelsByManager(Long managerId) {
+        return hotelRepository.findByManagerIdAndIsDeletedFalse(managerId)
+                .stream()
+                .map(HotelResponseDTO::fromEntity)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<HotelResponseDTO> getAllHotels() {
+        return hotelRepository.findByIsDeletedFalse()
+                .stream()
+                .map(HotelResponseDTO::fromEntity)
+                .collect(Collectors.toList());
     }
 
     @Override
     public Hotel updateHotel(Hotel updatedHotel) {
-        // ⛔ Prevent update of deleted hotel
         Hotel existingHotel = hotelRepository.findByIdAndIsDeletedFalse(updatedHotel.getId())
                 .orElseThrow(() -> new HotelNotFoundException("Hotel with ID " + updatedHotel.getId() + " not found or has been deleted."));
 
-        // Check for name conflict
         Hotel duplicate = hotelRepository.findByName(updatedHotel.getName());
         if (!existingHotel.getName().equals(updatedHotel.getName())
                 && duplicate != null && !duplicate.getId().equals(existingHotel.getId())) {
@@ -61,13 +93,11 @@ public class HotelServiceImpl implements HotelService {
 
         validateRating(updatedHotel.getRating());
 
-        // Basic field updates
         existingHotel.setName(updatedHotel.getName());
         existingHotel.setLocation(updatedHotel.getLocation());
         existingHotel.setDescription(updatedHotel.getDescription());
         existingHotel.setRating(updatedHotel.getRating());
 
-        // Replace images
         existingHotel.getImages().clear();
         if (updatedHotel.getImages() != null) {
             for (HotelImage image : updatedHotel.getImages()) {
@@ -80,16 +110,66 @@ public class HotelServiceImpl implements HotelService {
     }
 
     @Override
-    public void deleteHotel(Long id) {
-        Hotel hotel = hotelRepository.findByIdAndIsDeletedFalse(id)
-                .orElseThrow(() -> new HotelNotFoundException("Hotel with ID " + id + " not found"));
-        hotel.setDeleted(true);  // Soft delete
+    public HotelResponseDTO updateHotel(Long id, HotelRequestDTO dto, Long managerId) {
+        Hotel hotel = getActiveHotelOrThrow(id);
+        validateOwnership(hotel, managerId);
+
+        if (!hotel.getName().equalsIgnoreCase(dto.getName())
+                && hotelRepository.findByName(dto.getName()) != null) {
+            throw new DuplicateHotelNameException("Another hotel with name '" + dto.getName() + "' already exists.");
+        }
+
+        if (dto.getRating() < 1.0 || dto.getRating() > 5.0) {
+            throw new InvalidRatingException("Rating must be between 1.0 and 5.0.");
+        }
+
+        hotel.setName(dto.getName());
+        hotel.setDescription(dto.getDescription());
+        hotel.setLocation(dto.getLocation());
+        hotel.setRating(dto.getRating());
+
+        return HotelResponseDTO.fromEntity(hotelRepository.save(hotel));
+    }
+
+    @Override
+    public void deleteHotel(Long id, Long managerId) {
+        Hotel hotel = getActiveHotelOrThrow(id);
+        validateOwnership(hotel, managerId);
+        hotel.setDeleted(true);
         hotelRepository.save(hotel);
     }
 
+    @Override
+    public long countByManager(Long managerId) {
+        return hotelRepository.countByManagerIdAndIsDeletedFalse(managerId);
+    }
+
+    @Override
+    public long countAll() {
+        return hotelRepository.countByIsDeletedFalse();
+    }
+
+    // Helper methods
     private void validateRating(double rating) {
         if (rating < 1.0 || rating > 5.0) {
             throw new InvalidRatingException("Rating must be between 1.0 and 5.0.");
         }
     }
+
+    private Hotel getActiveHotelOrThrow(Long id) {
+        return hotelRepository.findByIdAndIsDeletedFalse(id)
+                .orElseThrow(() -> new HotelNotFoundException("Hotel with ID " + id + " not found."));
+    }
+
+    private void validateOwnership(Hotel hotel, Long managerId) {
+        if (!hotel.getManager().getId().equals(managerId)) {
+            throw new UnauthorizedAccessException("You are not authorized to access this hotel.");
+        }
+    }
+
+	@Override
+	public Object findByManagerId(Long managerId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

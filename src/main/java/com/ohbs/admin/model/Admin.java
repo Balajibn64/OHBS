@@ -2,19 +2,8 @@ package com.ohbs.admin.model;
 
 import com.ohbs.common.model.Auditable;
 import com.ohbs.common.model.User;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToOne;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
 @Getter
@@ -29,12 +18,16 @@ public class Admin extends Auditable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, length = 50)
     private String firstName;
-    private String lastName;
-    private String phone;
-//    private String address;
 
-    @OneToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @Column(nullable = false, length = 50)
+    private String lastName;
+
+    @Column(nullable = false, unique = true, length = 15)
+    private String phone;
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 }

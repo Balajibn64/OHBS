@@ -11,4 +11,6 @@ public interface RoomService {
     List<RoomResponseDTO> getRoomsByHotel(Long hotelId);
     RoomResponseDTO updateRoom(Long id, RoomRequestDTO dto);
     void deleteRoom(Long id);
+	Object countRoomsByManager(Long managerId);
+	Object getAllRooms();
 }

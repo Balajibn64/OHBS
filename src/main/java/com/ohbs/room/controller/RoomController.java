@@ -11,10 +11,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ohbs.room.dto.RoomRequestDTO;
 import com.ohbs.room.dto.RoomResponseDTO;
+import com.ohbs.room.model.Room;
 import com.ohbs.room.service.RoomService;
 
 import jakarta.validation.Valid;
@@ -27,11 +29,16 @@ public class RoomController {
 
     private final RoomService roomService;
 
+    @GetMapping
+    public ResponseEntity<Object> getAllRooms() {
+        return ResponseEntity.ok(roomService.getAllRooms());
+    }
+
     @PostMapping
     public ResponseEntity<RoomResponseDTO> createRoom(@Valid @RequestBody RoomRequestDTO dto) {
         return new ResponseEntity<>(roomService.createRoom(dto), HttpStatus.CREATED);
     }
-
+    
     @GetMapping("/{id}")
     public ResponseEntity<RoomResponseDTO> getRoom(@PathVariable Long id) {
         return ResponseEntity.ok(roomService.getRoom(id));
@@ -52,5 +59,15 @@ public class RoomController {
         roomService.deleteRoom(id);
         return ResponseEntity.ok("Room with ID " + id + " has been deleted.");
     }
+    
+    @GetMapping("/count")
+    public ResponseEntity<?> getRoomCount(@RequestParam(required = false) Long managerId) {
+        if (managerId == null) {
+            return ResponseEntity.badRequest().body("Missing managerId");
+        }
+        return ResponseEntity.ok(roomService.countRoomsByManager(managerId));
+    }
+
+
 
 }

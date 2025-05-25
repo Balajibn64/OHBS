@@ -11,6 +11,6 @@ public class ManagerResponseDTO {
     private String lastName;
     private String phone;
     private Long hotelId;
-    private String hotelName;
     private String email;
+    private String profileImageUrl;
 }

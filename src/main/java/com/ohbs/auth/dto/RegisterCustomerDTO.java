@@ -1,19 +1,22 @@
 package com.ohbs.auth.dto;
 
-import lombok.Data;
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.Data;
 
 @Data
 public class RegisterCustomerDTO {
     
     @NotBlank(message = "Username is required")
     @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
+    @Column(unique = true)
     private String username;
     
     @NotBlank(message = "Email is required")
     @Email(message = "Please provide a valid email address")
+    @Column(unique = true)
     private String email;
     
     @NotBlank(message = "Password is required")

@@ -27,16 +27,13 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public RoomResponseDTO createRoom(RoomRequestDTO dto) {
-        // Validate hotel
         Hotel hotel = hotelRepository.findById(dto.getHotelId())
                 .orElseThrow(() -> new ResourceNotFoundException("Hotel not found with id: " + dto.getHotelId()));
 
-        // Check for duplicate room number in the same hotel
         if (roomRepository.existsByRoomNumberAndHotelId(dto.getRoomNumber(), dto.getHotelId())) {
             throw new RoomAlreadyExistsException("Room number '" + dto.getRoomNumber() + "' already exists in this hotel.");
         }
 
-        // Additional business rule (though DTO should handle it)
         if (dto.getPricePerDay() < 0) {
             throw new InvalidRoomDataException("Price per day cannot be negative.");
         }
@@ -62,7 +59,6 @@ public class RoomServiceImpl implements RoomService {
 
     @Override
     public List<RoomResponseDTO> getRoomsByHotel(Long hotelId) {
-        // Check hotel existence
         if (!hotelRepository.existsById(hotelId)) {
             throw new ResourceNotFoundException("Hotel not found with id: " + hotelId);
         }
@@ -81,7 +77,6 @@ public class RoomServiceImpl implements RoomService {
         Hotel hotel = hotelRepository.findById(dto.getHotelId())
                 .orElseThrow(() -> new ResourceNotFoundException("Hotel not found with id: " + dto.getHotelId()));
 
-        // Optional: check if updating to a duplicate room number
         if (!room.getRoomNumber().equals(dto.getRoomNumber()) &&
                 roomRepository.existsByRoomNumberAndHotelId(dto.getRoomNumber(), dto.getHotelId())) {
             throw new RoomAlreadyExistsException("Room number '" + dto.getRoomNumber() + "' already exists in this hotel.");
@@ -102,12 +97,25 @@ public class RoomServiceImpl implements RoomService {
         Room room = roomRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Room not found with id: " + id));
 
-        // Optional: Prevent deletion if room is not available
         if (!room.isAvailable()) {
             throw new RoomNotAvailableException("Cannot delete room because it is currently marked as unavailable.");
         }
 
         roomRepository.delete(room);
+    }
+
+    @Override
+    public List<RoomResponseDTO> getAllRooms() {
+        return roomRepository.findAll()
+                .stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public Object countRoomsByManager(Long managerId) {
+        // You can implement logic to count rooms based on manager ID here
+        return null;
     }
 
     private RoomResponseDTO mapToDTO(Room room) {

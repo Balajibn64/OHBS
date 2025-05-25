@@ -1,24 +1,23 @@
 package com.ohbs.manager.controller;
 
-import java.util.List;
-
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import com.ohbs.common.exception.UnauthorizedException;
 import com.ohbs.manager.dto.ManagerRequestDTO;
 import com.ohbs.manager.dto.ManagerResponseDTO;
 import com.ohbs.manager.service.ManagerService;
-import com.ohbs.security.jwt.JwtUtil; // ✅ correct package
+import com.ohbs.security.jwt.JwtUtil;
+import com.ohbs.common.exception.UnauthorizedException;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
+
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/manager")
@@ -28,53 +27,53 @@ public class ManagerController {
     private final ManagerService managerService;
     private final JwtUtil jwtUtil;
 
-    // Create manager profile
     @PostMapping
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<ManagerResponseDTO> createManagerProfile(@RequestBody ManagerRequestDTO dto,
-                                                                   HttpServletRequest request) {
-        Long userId = getUserIdFromRequest(request);
-        ManagerResponseDTO response = managerService.createManagerProfile(dto, userId);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<ManagerResponseDTO> createManagerProfile(
+            @Valid @RequestBody ManagerRequestDTO dto,
+            HttpServletRequest request) {
+
+        Long userId = extractUserId(request);
+        return ResponseEntity.ok(managerService.createManagerProfile(dto, userId));
     }
 
-    // Get manager profile
     @GetMapping
     @PreAuthorize("hasRole('MANAGER')")
     public ResponseEntity<ManagerResponseDTO> getManagerProfile(HttpServletRequest request) {
-        Long userId = getUserIdFromRequest(request);
-        ManagerResponseDTO response = managerService.getManagerProfile(userId);
-        return ResponseEntity.ok(response);
+        Long userId = extractUserId(request);
+        return ResponseEntity.ok(managerService.getManagerProfile(userId));
     }
 
-    // Update manager profile
     @PutMapping
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<ManagerResponseDTO> updateManagerProfile(@RequestBody ManagerRequestDTO dto,
-                                                                   HttpServletRequest request) {
-        Long userId = getUserIdFromRequest(request);
-        ManagerResponseDTO response = managerService.updateManagerProfile(userId, dto);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<ManagerResponseDTO> updateManagerProfile(
+            @Valid @RequestBody ManagerRequestDTO dto,
+            HttpServletRequest request) {
+
+        Long userId = extractUserId(request);
+        return ResponseEntity.ok(managerService.updateManagerProfile(userId, dto));
     }
 
-    // Soft delete manager profile
     @DeleteMapping
     @PreAuthorize("hasRole('MANAGER')")
-    public ResponseEntity<Void> deleteManagerProfile(HttpServletRequest request) {
-        Long userId = getUserIdFromRequest(request);
+    public ResponseEntity<String> deleteManagerProfile(HttpServletRequest request) {
+        Long userId = extractUserId(request);
         managerService.deleteManagerProfile(userId);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok("Manager profile successfully deleted.");
     }
 
-    // Optional: Admin-only - List all managers
-    @GetMapping("/all")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<List<ManagerResponseDTO>> getAllManagers() {
-        return ResponseEntity.ok(managerService.getAllManagers());
+    @PostMapping(value = "/upload-image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("hasRole('MANAGER')")
+    public ResponseEntity<String> uploadManagerImage(
+            @RequestParam("image") MultipartFile imageFile,
+            HttpServletRequest request) {
+
+        Long userId = extractUserId(request);
+        managerService.uploadProfileImage(userId, imageFile);
+        return ResponseEntity.ok("Profile image uploaded successfully.");
     }
 
-    // ✅ Correct utility method to extract userId from JWT token
-    private Long getUserIdFromRequest(HttpServletRequest request) {
+    private Long extractUserId(HttpServletRequest request) {
         String authHeader = request.getHeader("Authorization");
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             throw new UnauthorizedException("Missing or invalid Authorization header");

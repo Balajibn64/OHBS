@@ -5,6 +5,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import lombok.Builder;
 import lombok.Data;
 
 @Data
@@ -18,6 +19,5 @@ public class User extends Auditable{
 	private String username;
 	private String email;
 	private String password;
-//	private String phoneNumber;
 	private Role role;
 }
